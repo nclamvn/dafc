@@ -1,0 +1,44 @@
+# Keep Render Service Alive
+# This workflow pings the health endpoint every 10 minutes to prevent cold starts
+# Add this file to: .github/workflows/keep-alive.yml
+
+name: Keep Render Alive
+
+on:
+  schedule:
+    # Run every 10 minutes
+    - cron: '*/10 * * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    
+    steps:
+      - name: Ping Health Endpoint
+        run: |
+          echo "🏥 Pinging health endpoint..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            https://dafc-otb-platform.onrender.com/api/v1/health \
+            --connect-timeout 30 \
+            --max-time 60)
+          
+          echo "Response code: $response"
+          
+          if [ "$response" = "200" ]; then
+            echo "✅ Service is healthy"
+          else
+            echo "⚠️ Service returned: $response"
+          fi
+          
+      - name: Log Timestamp
+        run: |
+          echo "📅 Pinged at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+
+      - name: Ping AI Test (Optional)
+        continue-on-error: true
+        run: |
+          echo "🤖 Testing AI endpoint..."
+          curl -s https://dafc-otb-platform.onrender.com/api/ai/test | head -c 200
+          echo ""
