@@ -21,7 +21,6 @@ export async function GET() {
     const { text } = await generateText({
       model: openai('gpt-4o-mini'),
       prompt: 'Say "AI is working!" in exactly 3 words.',
-      maxTokens: 20,
     });
 
     const latency = Date.now() - startTime;
