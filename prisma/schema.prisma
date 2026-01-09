@@ -1,0 +1,2046 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  ADMIN
+  FINANCE_HEAD
+  FINANCE_USER
+  BRAND_MANAGER
+  BRAND_PLANNER
+  MERCHANDISE_LEAD
+  BOD_MEMBER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+}
+
+enum BudgetStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REVISED
+  REJECTED
+}
+
+enum Gender {
+  MEN
+  WOMEN
+  UNISEX
+  KIDS
+}
+
+enum OTBPlanStatus {
+  DRAFT
+  SYSTEM_PROPOSED
+  USER_PROPOSED
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  FINAL
+}
+
+enum OTBVersionType {
+  V0_SYSTEM
+  V1_USER
+  V2_ADJUSTED
+  V3_REVIEWED
+  VA_APPROVED
+  VF_FINAL
+}
+
+enum SKUProposalStatus {
+  DRAFT
+  VALIDATING
+  VALIDATED
+  ENRICHING
+  ENRICHED
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum SKUValidationStatus {
+  PENDING
+  VALID
+  WARNING
+  ERROR
+}
+
+enum WorkflowType {
+  BUDGET_APPROVAL
+  OTB_APPROVAL
+  SKU_APPROVAL
+}
+
+enum WorkflowStatus {
+  PENDING
+  IN_PROGRESS
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum WorkflowStepStatus {
+  PENDING
+  IN_PROGRESS
+  APPROVED
+  REJECTED
+  SKIPPED
+}
+
+enum NotificationType {
+  BUDGET_SUBMITTED
+  BUDGET_APPROVED
+  BUDGET_REJECTED
+  OTB_SUBMITTED
+  OTB_APPROVED
+  OTB_REJECTED
+  OTB_COMMENT
+  SKU_UPLOADED
+  SKU_VALIDATED
+  SKU_APPROVED
+  WORKFLOW_ASSIGNED
+  WORKFLOW_REMINDER
+  SLA_WARNING
+  SLA_BREACHED
+  SYSTEM_ALERT
+}
+
+enum NotificationPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  name          String
+  password      String
+  role          UserRole   @default(BRAND_PLANNER)
+  status        UserStatus @default(ACTIVE)
+  avatar        String?
+
+  assignedBrands Brand[]   @relation("UserBrands")
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  lastLoginAt   DateTime?
+
+  // Budget relations
+  createdBudgets    BudgetAllocation[] @relation("BudgetCreatedBy")
+  approvedBudgets   BudgetAllocation[] @relation("BudgetApprovedBy")
+  rejectedBudgets   BudgetAllocation[] @relation("BudgetRejectedBy")
+
+  // OTB relations
+  createdOTBPlans   OTBPlan[] @relation("OTBCreatedBy")
+  approvedOTBPlans  OTBPlan[] @relation("OTBApprovedBy")
+
+  // SKU relations
+  createdSKUProposals  SKUProposal[] @relation("SKUCreatedBy")
+  approvedSKUProposals SKUProposal[] @relation("SKUApprovedBy")
+
+  // Workflow relations
+  initiatedWorkflows Workflow[]     @relation("WorkflowInitiatedBy")
+  assignedSteps      WorkflowStep[] @relation("StepAssignedTo")
+  actionedSteps      WorkflowStep[] @relation("StepActionBy")
+
+  // Other relations
+  notifications      Notification[]
+  aiInteractions     AIInteractionLog[]
+  comments           Comment[]
+  resolvedComments   Comment[] @relation("CommentResolvedBy")
+
+  // Sprint 4 relations
+  auditLogs          AuditLog[]
+  savedFilters       SavedFilter[]
+  preference         UserPreference?
+  reports            Report[]
+  reportExecutions   ReportExecution[]
+  recentSearches     RecentSearch[]
+
+  // Sprint 5 relations
+  kpiTargets         KPITarget[]
+  kpiAlertsAcknowledged KPIAlert[]
+  forecasts          Forecast[]
+  scenarios          Scenario[]
+  aiInsights         AIInsight[]
+  dashboardWidgets   DashboardWidget[]
+
+  // Sprint 8 relations
+  aiConversations    AIConversation[]
+  aiSuggestions      AISuggestion[]
+  aiGeneratedPlans   AIGeneratedPlan[]
+  predictiveAlerts   PredictiveAlert[]
+
+  // Sprint 6 relations
+  accounts               Account[]
+  storedFiles            StoredFile[]
+  erpSyncLogs            ERPSyncLog[]
+  webhooks               Webhook[]
+  apiKeys                APIKey[]
+  realtimeNotifications  RealtimeNotification[]
+
+  @@map("users")
+}
+
+// ============================================
+// MASTER DATA - ORGANIZATION
+// ============================================
+
+model Division {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  code        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  brands      Brand[]
+
+  @@map("divisions")
+}
+
+model Brand {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  description String?
+  logoUrl     String?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+
+  divisionId  String
+  division    Division @relation(fields: [divisionId], references: [id])
+
+  assignedUsers User[] @relation("UserBrands")
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  collections   Collection[]
+  budgets       BudgetAllocation[]
+  otbPlans      OTBPlan[]
+  skuProposals  SKUProposal[]
+
+  // Sprint 5 relations
+  kpiTargets    KPITarget[]
+  forecasts     Forecast[]
+
+  // Sprint 8 relations
+  aiSuggestions     AISuggestion[]
+  aiGeneratedPlans  AIGeneratedPlan[]
+  predictiveAlerts  PredictiveAlert[]
+
+  @@map("brands")
+}
+
+model Collection {
+  id          String   @id @default(cuid())
+  name        String
+  code        String
+  description String?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+
+  brandId     String
+  brand       Brand    @relation(fields: [brandId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  otbLineItems OTBLineItem[]
+  skuItems     SKUItem[]
+
+  @@unique([brandId, code])
+  @@map("collections")
+}
+
+// ============================================
+// MASTER DATA - PRODUCT HIERARCHY
+// ============================================
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subcategories   Subcategory[]
+  otbLineItems    OTBLineItem[]
+  sizingAnalyses  SizingAnalysis[]
+  skuItems        SKUItem[]
+
+  // Sprint 5 relations
+  forecasts       Forecast[]
+
+  // Sprint 8 relations
+  aiSuggestions     AISuggestion[]
+  predictiveAlerts  PredictiveAlert[]
+
+  @@map("categories")
+}
+
+model Subcategory {
+  id          String   @id @default(cuid())
+  name        String
+  code        String
+  description String?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  otbLineItems    OTBLineItem[]
+  sizingAnalyses  SizingAnalysis[]
+  skuItems        SKUItem[]
+
+  @@unique([categoryId, code])
+  @@map("subcategories")
+}
+
+// ============================================
+// MASTER DATA - LOCATIONS
+// ============================================
+
+model SalesLocation {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  type        String   @default("STORE")
+  address     String?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  budgets         BudgetAllocation[]
+  sizingAnalyses  SizingAnalysis[]
+
+  // Sprint 5 relations
+  kpiTargets      KPITarget[]
+
+  @@map("sales_locations")
+}
+
+// ============================================
+// MASTER DATA - SEASONS
+// ============================================
+
+model Season {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  seasonGroup String
+  year        Int
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean  @default(true)
+  isCurrent   Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  budgets       BudgetAllocation[]
+  otbPlans      OTBPlan[]
+  skuProposals  SKUProposal[]
+
+  // Sprint 5 relations
+  kpiTargets    KPITarget[]
+  forecasts     Forecast[]
+  scenarios     Scenario[]
+
+  // Sprint 8 relations
+  aiSuggestions     AISuggestion[]
+  aiGeneratedPlans  AIGeneratedPlan[]
+  predictiveAlerts  PredictiveAlert[]
+
+  @@map("seasons")
+}
+
+// ============================================
+// BUDGET MODULE
+// ============================================
+
+model BudgetAllocation {
+  id                  String       @id @default(cuid())
+
+  // References
+  seasonId            String
+  season              Season       @relation(fields: [seasonId], references: [id])
+  brandId             String
+  brand               Brand        @relation(fields: [brandId], references: [id])
+  locationId          String
+  location            SalesLocation @relation(fields: [locationId], references: [id])
+
+  // Budget amounts
+  totalBudget         Decimal      @db.Decimal(15, 2)
+  seasonalBudget      Decimal?     @db.Decimal(15, 2)
+  replenishmentBudget Decimal?     @db.Decimal(15, 2)
+  currency            String       @default("USD")
+
+  // Status & Version
+  status              BudgetStatus @default(DRAFT)
+  version             Int          @default(1)
+  parentVersionId     String?
+  parentVersion       BudgetAllocation? @relation("BudgetVersions", fields: [parentVersionId], references: [id])
+  childVersions       BudgetAllocation[] @relation("BudgetVersions")
+
+  // Comments & Metadata
+  comments            String?      @db.Text
+  assumptions         Json?
+
+  // Workflow
+  workflowId          String?
+  workflow            Workflow?    @relation(fields: [workflowId], references: [id])
+
+  // Audit
+  createdById         String
+  createdBy           User         @relation("BudgetCreatedBy", fields: [createdById], references: [id])
+  createdAt           DateTime     @default(now())
+  submittedAt         DateTime?
+  approvedById        String?
+  approvedBy          User?        @relation("BudgetApprovedBy", fields: [approvedById], references: [id])
+  approvedAt          DateTime?
+  rejectedById        String?
+  rejectedBy          User?        @relation("BudgetRejectedBy", fields: [rejectedById], references: [id])
+  rejectedAt          DateTime?
+  rejectionReason     String?
+  updatedAt           DateTime     @updatedAt
+
+  // Relations
+  otbPlans            OTBPlan[]
+
+  @@unique([seasonId, brandId, locationId, version])
+  @@map("budget_allocations")
+}
+
+// ============================================
+// OTB ANALYSIS MODULE
+// ============================================
+
+model OTBPlan {
+  id                  String         @id @default(cuid())
+
+  // References
+  budgetId            String
+  budget              BudgetAllocation @relation(fields: [budgetId], references: [id])
+  seasonId            String
+  season              Season         @relation(fields: [seasonId], references: [id])
+  brandId             String
+  brand               Brand          @relation(fields: [brandId], references: [id])
+
+  // Version tracking
+  version             Int            @default(1)
+  versionType         OTBVersionType @default(V0_SYSTEM)
+  versionName         String?
+  parentVersionId     String?
+  parentVersion       OTBPlan?       @relation("OTBVersions", fields: [parentVersionId], references: [id])
+  childVersions       OTBPlan[]      @relation("OTBVersions")
+
+  // Status
+  status              OTBPlanStatus  @default(DRAFT)
+
+  // Totals
+  totalOTBValue       Decimal        @db.Decimal(15, 2)
+  totalSKUCount       Int            @default(0)
+
+  // AI Metadata
+  aiConfidenceScore   Float?
+  aiGeneratedAt       DateTime?
+  aiModelUsed         String?
+
+  // Comments
+  comments            String?        @db.Text
+  executiveSummary    String?        @db.Text
+
+  // Workflow
+  workflowId          String?
+  workflow            Workflow?      @relation(fields: [workflowId], references: [id])
+
+  // Audit
+  createdById         String
+  createdBy           User           @relation("OTBCreatedBy", fields: [createdById], references: [id])
+  createdAt           DateTime       @default(now())
+  submittedAt         DateTime?
+  approvedById        String?
+  approvedBy          User?          @relation("OTBApprovedBy", fields: [approvedById], references: [id])
+  approvedAt          DateTime?
+  updatedAt           DateTime       @updatedAt
+
+  // Line items
+  lineItems           OTBLineItem[]
+  sizingAnalysis      SizingAnalysis[]
+  skuProposals        SKUProposal[]
+
+  @@unique([budgetId, version])
+  @@map("otb_plans")
+}
+
+model OTBLineItem {
+  id                  String    @id @default(cuid())
+
+  otbPlanId           String
+  otbPlan             OTBPlan   @relation(fields: [otbPlanId], references: [id], onDelete: Cascade)
+
+  // Hierarchy
+  level               Int
+  collectionId        String?
+  collection          Collection? @relation(fields: [collectionId], references: [id])
+  gender              Gender?
+  categoryId          String?
+  category            Category?  @relation(fields: [categoryId], references: [id])
+  subcategoryId       String?
+  subcategory         Subcategory? @relation(fields: [subcategoryId], references: [id])
+  sizeGroup           String?
+
+  // Historical data
+  historicalSalesPct  Decimal?   @db.Decimal(5, 2)
+  historicalSalesValue Decimal?  @db.Decimal(15, 2)
+  historicalUnits     Int?
+
+  // System proposal
+  systemProposedPct   Decimal?   @db.Decimal(5, 2)
+  systemProposedValue Decimal?   @db.Decimal(15, 2)
+  systemConfidence    Float?
+
+  // User input
+  userBuyPct          Decimal    @db.Decimal(5, 2)
+  userBuyValue        Decimal    @db.Decimal(15, 2)
+  userUnits           Int?
+
+  // Variance
+  varianceFromSystem  Decimal?   @db.Decimal(5, 2)
+  varianceFromHist    Decimal?   @db.Decimal(5, 2)
+
+  // Comments
+  comment             String?    @db.Text
+  aiGeneratedComment  String?    @db.Text
+
+  // Status flags
+  hasAnomaly          Boolean    @default(false)
+  anomalyType         String?
+  isLocked            Boolean    @default(false)
+
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  @@index([otbPlanId, level])
+  @@map("otb_line_items")
+}
+
+model SizingAnalysis {
+  id                  String    @id @default(cuid())
+
+  otbPlanId           String
+  otbPlan             OTBPlan   @relation(fields: [otbPlanId], references: [id], onDelete: Cascade)
+
+  // Context
+  categoryId          String
+  category            Category  @relation(fields: [categoryId], references: [id])
+  subcategoryId       String?
+  subcategory         Subcategory? @relation(fields: [subcategoryId], references: [id])
+  gender              Gender
+  locationId          String?
+  location            SalesLocation? @relation(fields: [locationId], references: [id])
+
+  // Size data (stored as JSON for flexibility)
+  sizeData            Json
+
+  // AI insights
+  aiInsight           String?   @db.Text
+  aiRecommendation    String?   @db.Text
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@map("sizing_analyses")
+}
+
+// ============================================
+// SKU PROPOSAL MODULE
+// ============================================
+
+model SKUProposal {
+  id                  String             @id @default(cuid())
+
+  // References
+  otbPlanId           String
+  otbPlan             OTBPlan            @relation(fields: [otbPlanId], references: [id])
+  seasonId            String
+  season              Season             @relation(fields: [seasonId], references: [id])
+  brandId             String
+  brand               Brand              @relation(fields: [brandId], references: [id])
+
+  // Upload info
+  uploadedFileName    String?
+  uploadedFileUrl     String?
+  uploadedAt          DateTime?
+
+  // Status
+  status              SKUProposalStatus  @default(DRAFT)
+
+  // Counts
+  totalSKUs           Int                @default(0)
+  validSKUs           Int                @default(0)
+  errorSKUs           Int                @default(0)
+  warningSKUs         Int                @default(0)
+
+  // Totals
+  totalValue          Decimal?           @db.Decimal(15, 2)
+  totalUnits          Int?
+
+  // Workflow
+  workflowId          String?
+  workflow            Workflow?          @relation(fields: [workflowId], references: [id])
+
+  // Audit
+  createdById         String
+  createdBy           User               @relation("SKUCreatedBy", fields: [createdById], references: [id])
+  createdAt           DateTime           @default(now())
+  submittedAt         DateTime?
+  approvedById        String?
+  approvedBy          User?              @relation("SKUApprovedBy", fields: [approvedById], references: [id])
+  approvedAt          DateTime?
+  updatedAt           DateTime           @updatedAt
+
+  // Items
+  items               SKUItem[]
+
+  @@map("sku_proposals")
+}
+
+model SKUItem {
+  id                  String              @id @default(cuid())
+
+  proposalId          String
+  proposal            SKUProposal         @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+
+  // SKU info
+  skuCode             String
+  styleName           String
+  colorCode           String?
+  colorName           String?
+  material            String?
+
+  // Hierarchy
+  collectionId        String?
+  collection          Collection?         @relation(fields: [collectionId], references: [id])
+  gender              Gender
+  categoryId          String
+  category            Category            @relation(fields: [categoryId], references: [id])
+  subcategoryId       String?
+  subcategory         Subcategory?        @relation(fields: [subcategoryId], references: [id])
+
+  // Pricing
+  retailPrice         Decimal             @db.Decimal(15, 2)
+  costPrice           Decimal             @db.Decimal(15, 2)
+  margin              Decimal?            @db.Decimal(5, 2)
+
+  // Order
+  orderQuantity       Int
+  orderValue          Decimal?            @db.Decimal(15, 2)
+
+  // Size breakdown (JSON array)
+  sizeBreakdown       Json?
+
+  // Supplier info
+  supplierSKU         String?
+  leadTime            Int?
+  moq                 Int?
+  countryOfOrigin     String?
+
+  // Validation
+  validationStatus    SKUValidationStatus @default(PENDING)
+  validationErrors    Json?
+  validationWarnings  Json?
+
+  // AI Enrichment
+  aiDemandScore       Float?
+  aiDemandPrediction  String?
+  aiRecommendedQty    Int?
+  aiSimilarSKUs       Json?
+  aiInsights          String?             @db.Text
+  aiEnrichedAt        DateTime?
+
+  // Image
+  imageUrl            String?
+  imageUploadedAt     DateTime?
+
+  // Status flags
+  isNew               Boolean             @default(true)
+  isActive            Boolean             @default(true)
+
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  @@unique([proposalId, skuCode])
+  @@index([proposalId, validationStatus])
+  @@map("sku_items")
+}
+
+// ============================================
+// WORKFLOW ENGINE
+// ============================================
+
+model Workflow {
+  id                  String          @id @default(cuid())
+
+  // Type & Reference
+  type                WorkflowType
+  referenceId         String
+  referenceType       String
+
+  // Status
+  status              WorkflowStatus  @default(PENDING)
+  currentStep         Int             @default(1)
+  totalSteps          Int
+
+  // Initiator
+  initiatedById       String
+  initiatedBy         User            @relation("WorkflowInitiatedBy", fields: [initiatedById], references: [id])
+  initiatedAt         DateTime        @default(now())
+
+  // Completion
+  completedAt         DateTime?
+
+  // SLA
+  slaDeadline         DateTime?
+  slaBreached         Boolean         @default(false)
+
+  // Steps
+  steps               WorkflowStep[]
+
+  // Relations
+  budgets             BudgetAllocation[]
+  otbPlans            OTBPlan[]
+  skuProposals        SKUProposal[]
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@index([type, status])
+  @@index([referenceId, referenceType])
+  @@map("workflows")
+}
+
+model WorkflowStep {
+  id                  String              @id @default(cuid())
+
+  workflowId          String
+  workflow            Workflow            @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  // Step info
+  stepNumber          Int
+  stepName            String
+  description         String?
+
+  // Assignment
+  assignedRole        UserRole?
+  assignedUserId      String?
+  assignedUser        User?               @relation("StepAssignedTo", fields: [assignedUserId], references: [id])
+
+  // Status
+  status              WorkflowStepStatus  @default(PENDING)
+
+  // Action
+  actionById          String?
+  actionBy            User?               @relation("StepActionBy", fields: [actionById], references: [id])
+  actionAt            DateTime?
+  actionType          String?
+  actionComment       String?             @db.Text
+
+  // SLA
+  slaHours            Int?
+  dueAt               DateTime?
+
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  @@unique([workflowId, stepNumber])
+  @@map("workflow_steps")
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+model Notification {
+  id                  String               @id @default(cuid())
+
+  // Recipient
+  userId              String
+  user                User                 @relation(fields: [userId], references: [id])
+
+  // Content
+  type                NotificationType
+  priority            NotificationPriority @default(MEDIUM)
+  title               String
+  message             String               @db.Text
+
+  // Reference
+  referenceId         String?
+  referenceType       String?
+  referenceUrl        String?
+
+  // Status
+  isRead              Boolean              @default(false)
+  readAt              DateTime?
+
+  // Email
+  emailSent           Boolean              @default(false)
+  emailSentAt         DateTime?
+
+  createdAt           DateTime             @default(now())
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+// ============================================
+// AI INTERACTION LOG
+// ============================================
+
+model AIInteractionLog {
+  id                  String    @id @default(cuid())
+
+  // User
+  userId              String
+  user                User      @relation(fields: [userId], references: [id])
+
+  // Context
+  contextType         String
+  contextId           String?
+
+  // Request
+  prompt              String    @db.Text
+  model               String
+
+  // Response
+  response            String    @db.Text
+  tokensUsed          Int?
+  latencyMs           Int?
+
+  // Feedback
+  wasAccepted         Boolean?
+  userFeedback        String?
+
+  createdAt           DateTime  @default(now())
+
+  @@index([userId, contextType])
+  @@map("ai_interaction_logs")
+}
+
+// ============================================
+// COMMENTS THREAD
+// ============================================
+
+model Comment {
+  id                  String    @id @default(cuid())
+
+  // Reference
+  referenceId         String
+  referenceType       String
+
+  // Thread
+  parentId            String?
+  parent              Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies             Comment[] @relation("CommentReplies")
+
+  // Content
+  content             String    @db.Text
+  isAIGenerated       Boolean   @default(false)
+
+  // Author
+  authorId            String
+  author              User      @relation(fields: [authorId], references: [id])
+
+  // Status
+  isResolved          Boolean   @default(false)
+  resolvedById        String?
+  resolvedBy          User?     @relation("CommentResolvedBy", fields: [resolvedById], references: [id])
+  resolvedAt          DateTime?
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([referenceId, referenceType])
+  @@map("comments")
+}
+
+// ============================================
+// AUDIT LOG
+// ============================================
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  tableName   String
+  recordId    String
+  action      String
+  oldValue    Json?
+  newValue    Json?
+  changedFields String[]
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  userEmail   String
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@index([tableName, recordId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ============================================
+// SAVED FILTERS
+// ============================================
+
+model SavedFilter {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  entityType  String
+  filterConfig Json
+  isDefault   Boolean  @default(false)
+  isShared    Boolean  @default(false)
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, name, entityType])
+  @@map("saved_filters")
+}
+
+// ============================================
+// USER PREFERENCES
+// ============================================
+
+model UserPreference {
+  id          String   @id @default(cuid())
+
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+
+  // UI Preferences
+  theme       String   @default("system")
+  language    String   @default("en")
+  timezone    String   @default("Asia/Ho_Chi_Minh")
+  dateFormat  String   @default("DD/MM/YYYY")
+  numberFormat String  @default("en-US")
+
+  // Dashboard Preferences
+  dashboardLayout Json?
+  defaultFilters  Json?
+
+  // Notification Preferences
+  emailNotifications   Boolean @default(true)
+  emailDigestFrequency String  @default("daily")
+  pushNotifications    Boolean @default(true)
+
+  // Table Preferences
+  tablePageSize Int     @default(20)
+  tableColumns  Json?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("user_preferences")
+}
+
+// ============================================
+// REPORTS
+// ============================================
+
+enum ReportType {
+  BUDGET_SUMMARY
+  OTB_ANALYSIS
+  SKU_PERFORMANCE
+  APPROVAL_STATUS
+  USER_ACTIVITY
+  CUSTOM
+}
+
+model Report {
+  id          String      @id @default(cuid())
+  name        String
+  description String?
+  type        ReportType
+  config      Json
+  schedule    String?
+
+  lastRunAt     DateTime?
+  lastRunStatus String?
+
+  isTemplate  Boolean     @default(false)
+  isShared    Boolean     @default(false)
+
+  createdById String
+  createdBy   User        @relation(fields: [createdById], references: [id])
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  executions  ReportExecution[]
+
+  @@map("reports")
+}
+
+model ReportExecution {
+  id          String    @id @default(cuid())
+
+  reportId    String
+  report      Report    @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  status      String
+  format      String
+  fileUrl     String?
+  fileSize    Int?
+
+  parameters  Json?
+  errorMessage String?
+
+  executedById String
+  executedBy   User      @relation(fields: [executedById], references: [id])
+
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@map("report_executions")
+}
+
+// ============================================
+// SEARCH
+// ============================================
+
+model SearchIndex {
+  id          String   @id @default(cuid())
+  entityType  String
+  entityId    String
+  title       String
+  content     String   @db.Text
+  metadata    Json?
+  updatedAt   DateTime @updatedAt
+
+  @@unique([entityType, entityId])
+  @@map("search_index")
+}
+
+model RecentSearch {
+  id          String   @id @default(cuid())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  query       String
+  resultCount Int
+  clickedResult String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@map("recent_searches")
+}
+
+// ============================================
+// SPRINT 5 - ANALYTICS & KPI
+// ============================================
+
+enum KPICategory {
+  SALES
+  INVENTORY
+  MARGIN
+  OPERATIONS
+  CUSTOMER
+  FINANCIAL
+}
+
+enum AggregationType {
+  SUM
+  AVERAGE
+  COUNT
+  MIN
+  MAX
+  WEIGHTED_AVG
+  CUSTOM
+}
+
+enum TargetType {
+  HIGHER_IS_BETTER
+  LOWER_IS_BETTER
+  TARGET_VALUE
+  RANGE
+}
+
+enum PeriodType {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  SEASON
+  YEARLY
+}
+
+enum AlertType {
+  THRESHOLD_BREACH
+  TREND_CHANGE
+  ANOMALY_DETECTED
+  TARGET_AT_RISK
+  FORECAST_DEVIATION
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum ForecastType {
+  DEMAND
+  SALES
+  INVENTORY
+  MARGIN
+}
+
+enum ScenarioStatus {
+  DRAFT
+  ANALYZING
+  COMPLETED
+  APPLIED
+  ARCHIVED
+}
+
+enum InsightType {
+  OPPORTUNITY
+  RISK
+  ANOMALY
+  TREND
+  RECOMMENDATION
+  ALERT
+}
+
+enum ImpactLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum InsightStatus {
+  NEW
+  VIEWED
+  ACTION_TAKEN
+  DISMISSED
+  EXPIRED
+}
+
+enum WidgetType {
+  METRIC_CARD
+  LINE_CHART
+  BAR_CHART
+  PIE_CHART
+  TABLE
+  HEATMAP
+  GAUGE
+  TREND
+  COMPARISON
+  AI_INSIGHT
+}
+
+// KPI Definition
+model KPIDefinition {
+  id              String          @id @default(cuid())
+
+  code            String          @unique
+  name            String
+  description     String?
+  category        KPICategory
+
+  formula         String
+  dataSource      String
+  aggregationType AggregationType
+
+  unit            String?
+  format          String?
+  decimals        Int             @default(2)
+
+  targetType      TargetType      @default(HIGHER_IS_BETTER)
+  warningThreshold Float?
+  criticalThreshold Float?
+
+  isActive        Boolean         @default(true)
+  isSystem        Boolean         @default(false)
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  targets         KPITarget[]
+  values          KPIValue[]
+  alerts          KPIAlert[]
+
+  @@map("kpi_definitions")
+}
+
+// KPI Targets
+model KPITarget {
+  id              String          @id @default(cuid())
+
+  kpiId           String
+  kpi             KPIDefinition   @relation(fields: [kpiId], references: [id])
+
+  seasonId        String?
+  season          Season?         @relation(fields: [seasonId], references: [id])
+  brandId         String?
+  brand           Brand?          @relation(fields: [brandId], references: [id])
+  locationId      String?
+  location        SalesLocation?  @relation(fields: [locationId], references: [id])
+
+  targetValue     Float
+  minValue        Float?
+  maxValue        Float?
+  stretchTarget   Float?
+
+  periodType      PeriodType      @default(SEASON)
+  periodStart     DateTime?
+  periodEnd       DateTime?
+
+  createdById     String
+  createdBy       User            @relation(fields: [createdById], references: [id])
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@unique([kpiId, seasonId, brandId, locationId, periodType])
+  @@map("kpi_targets")
+}
+
+// KPI Values
+model KPIValue {
+  id              String          @id @default(cuid())
+
+  kpiId           String
+  kpi             KPIDefinition   @relation(fields: [kpiId], references: [id])
+
+  seasonId        String?
+  brandId         String?
+  locationId      String?
+  categoryId      String?
+
+  value           Float
+  previousValue   Float?
+  changePercent   Float?
+
+  periodType      PeriodType
+  periodDate      DateTime
+
+  calculatedAt    DateTime        @default(now())
+  dataAsOf        DateTime
+
+  @@unique([kpiId, seasonId, brandId, locationId, categoryId, periodType, periodDate])
+  @@index([kpiId, periodDate])
+  @@map("kpi_values")
+}
+
+// KPI Alerts
+model KPIAlert {
+  id              String          @id @default(cuid())
+
+  kpiId           String
+  kpi             KPIDefinition   @relation(fields: [kpiId], references: [id])
+
+  alertType       AlertType
+  severity        AlertSeverity
+
+  currentValue    Float
+  thresholdValue  Float
+  message         String
+
+  seasonId        String?
+  brandId         String?
+  locationId      String?
+
+  isAcknowledged  Boolean         @default(false)
+  acknowledgedById String?
+  acknowledgedBy  User?           @relation(fields: [acknowledgedById], references: [id])
+  acknowledgedAt  DateTime?
+
+  createdAt       DateTime        @default(now())
+
+  @@index([kpiId, createdAt])
+  @@index([isAcknowledged])
+  @@map("kpi_alerts")
+}
+
+// Forecasts
+model Forecast {
+  id              String          @id @default(cuid())
+
+  forecastType    ForecastType
+  modelUsed       String
+
+  seasonId        String
+  season          Season          @relation(fields: [seasonId], references: [id])
+  brandId         String?
+  brand           Brand?          @relation(fields: [brandId], references: [id])
+  categoryId      String?
+  category        Category?       @relation(fields: [categoryId], references: [id])
+
+  forecastData    Json
+  confidence      Float
+  accuracy        Json?
+
+  generatedAt     DateTime        @default(now())
+  validUntil      DateTime
+  inputDataRange  Json
+
+  createdById     String
+  createdBy       User            @relation(fields: [createdById], references: [id])
+
+  @@index([seasonId, forecastType])
+  @@map("forecasts")
+}
+
+// Scenarios (What-If)
+model Scenario {
+  id              String          @id @default(cuid())
+
+  name            String
+  description     String?
+
+  baseSeasonId    String
+  baseSeason      Season          @relation(fields: [baseSeasonId], references: [id])
+  baseBudgetId    String?
+
+  parameters      Json
+  impactSummary   Json
+  detailedResults Json?
+
+  status          ScenarioStatus  @default(DRAFT)
+
+  createdById     String
+  createdBy       User            @relation(fields: [createdById], references: [id])
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@map("scenarios")
+}
+
+// AI Insights
+model AIInsight {
+  id              String          @id @default(cuid())
+
+  insightType     InsightType
+  category        String
+
+  title           String
+  description     String          @db.Text
+
+  impactLevel     ImpactLevel
+  confidence      Float
+
+  dataContext     Json
+  affectedEntities Json?
+
+  recommendations Json?
+
+  status          InsightStatus   @default(NEW)
+  viewedAt        DateTime?
+  actionTakenAt   DateTime?
+  dismissedAt     DateTime?
+
+  userId          String?
+  user            User?           @relation(fields: [userId], references: [id])
+
+  generatedAt     DateTime        @default(now())
+  expiresAt       DateTime?
+
+  @@index([insightType, status])
+  @@index([userId, generatedAt])
+  @@map("ai_insights")
+}
+
+// Dashboard Widgets
+model DashboardWidget {
+  id              String          @id @default(cuid())
+
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
+
+  widgetType      WidgetType
+  title           String
+
+  gridX           Int
+  gridY           Int
+  width           Int             @default(1)
+  height          Int             @default(1)
+
+  config          Json
+
+  isVisible       Boolean         @default(true)
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([userId])
+  @@map("dashboard_widgets")
+}
+
+// ============================================
+// SPRINT 8 - AI ASSISTANT & INTELLIGENCE
+// ============================================
+
+// AI Chat Conversation Sessions
+model AIConversation {
+  id              String          @id @default(cuid())
+
+  title           String?
+  summary         String?         @db.Text
+
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
+
+  messages        AIMessage[]
+
+  context         Json?           // Page context, entity context
+  metadata        Json?           // Token usage, model info
+
+  isArchived      Boolean         @default(false)
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  lastMessageAt   DateTime        @default(now())
+
+  @@index([userId, lastMessageAt])
+  @@index([userId, isArchived])
+  @@map("ai_conversations")
+}
+
+// AI Chat Messages
+model AIMessage {
+  id              String          @id @default(cuid())
+
+  conversationId  String
+  conversation    AIConversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  role            AIMessageRole
+  content         String          @db.Text
+
+  // Tool calls
+  toolCalls       Json?           // Array of tool calls made
+  toolResults     Json?           // Results from tool executions
+
+  // Metadata
+  tokenCount      Int?
+  latencyMs       Int?
+  model           String?
+
+  // Feedback
+  rating          Int?            // 1-5 rating
+  feedback        String?
+
+  createdAt       DateTime        @default(now())
+
+  @@index([conversationId, createdAt])
+  @@map("ai_messages")
+}
+
+// AI-Generated Suggestions
+model AISuggestion {
+  id              String              @id @default(cuid())
+
+  type            AISuggestionType
+  title           String
+  description     String              @db.Text
+
+  // Confidence and priority
+  confidence      Float               // 0-1 score
+  priority        SuggestionPriority  @default(MEDIUM)
+  impact          ImpactLevel         @default(MEDIUM)
+
+  // Related entities
+  seasonId        String?
+  season          Season?             @relation(fields: [seasonId], references: [id])
+
+  brandId         String?
+  brand           Brand?              @relation(fields: [brandId], references: [id])
+
+  categoryId      String?
+  category        Category?           @relation(fields: [categoryId], references: [id])
+
+  // Suggestion data
+  data            Json                // Structured suggestion data (SKUs, quantities, etc.)
+  reasoning       String?             @db.Text
+  metrics         Json?               // Projected impact metrics
+
+  // Status
+  status          SuggestionStatus    @default(PENDING)
+  reviewedById    String?
+  reviewedAt      DateTime?
+  reviewNotes     String?
+
+  // User who received suggestion
+  userId          String
+  user            User                @relation(fields: [userId], references: [id])
+
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  expiresAt       DateTime?
+
+  @@index([userId, status])
+  @@index([type, status])
+  @@index([seasonId, brandId])
+  @@map("ai_suggestions")
+}
+
+// AI-Generated OTB/Budget Plans
+model AIGeneratedPlan {
+  id              String              @id @default(cuid())
+
+  type            GeneratedPlanType
+  name            String
+  description     String?             @db.Text
+
+  // Context
+  seasonId        String?
+  season          Season?             @relation(fields: [seasonId], references: [id])
+
+  brandId         String?
+  brand           Brand?              @relation(fields: [brandId], references: [id])
+
+  // Plan data
+  planData        Json                // Full plan details
+  assumptions     Json?               // Assumptions used
+  historicalBasis Json?               // Historical data used
+
+  // Metrics
+  projectedRevenue    Decimal?        @db.Decimal(15, 2)
+  projectedMargin     Decimal?        @db.Decimal(5, 2)
+  confidenceScore     Float?
+
+  // Status
+  status          GeneratedPlanStatus @default(DRAFT)
+  appliedAt       DateTime?
+  appliedToId     String?             // ID of OTBPlan or Budget created
+
+  // User
+  userId          String
+  user            User                @relation(fields: [userId], references: [id])
+
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@index([userId, status])
+  @@index([seasonId, brandId])
+  @@map("ai_generated_plans")
+}
+
+// Predictive Alerts
+model PredictiveAlert {
+  id              String              @id @default(cuid())
+
+  type            PredictiveAlertType
+  severity        AlertSeverity       @default(WARNING)
+
+  title           String
+  description     String              @db.Text
+
+  // Prediction details
+  predictedDate   DateTime?           // When the issue is predicted to occur
+  probability     Float               // 0-1 probability
+  timeframe       String?             // e.g., "7 days", "2 weeks"
+
+  // Related entities
+  seasonId        String?
+  season          Season?             @relation(fields: [seasonId], references: [id])
+
+  brandId         String?
+  brand           Brand?              @relation(fields: [brandId], references: [id])
+
+  categoryId      String?
+  category        Category?           @relation(fields: [categoryId], references: [id])
+
+  skuId           String?
+
+  // Alert data
+  data            Json                // Detailed prediction data
+  recommendations Json?               // Suggested actions
+  metrics         Json?               // Current vs predicted metrics
+
+  // Status
+  status          PredictiveAlertStatus @default(ACTIVE)
+  acknowledgedById String?
+  acknowledgedAt  DateTime?
+  resolvedAt      DateTime?
+  resolutionNotes String?
+
+  // User assignment
+  userId          String?
+  user            User?               @relation(fields: [userId], references: [id])
+
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  expiresAt       DateTime?
+
+  @@index([type, status])
+  @@index([severity, status])
+  @@index([userId, status])
+  @@index([seasonId, brandId])
+  @@map("predictive_alerts")
+}
+
+// ============================================
+// SPRINT 8 ENUMS
+// ============================================
+
+enum AIMessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+  TOOL
+}
+
+enum AISuggestionType {
+  BUY_RECOMMENDATION      // Suggest purchases
+  MARKDOWN_RECOMMENDATION // Suggest markdowns
+  TRANSFER_RECOMMENDATION // Suggest inventory transfers
+  REORDER_RECOMMENDATION  // Suggest reorders
+  CANCEL_RECOMMENDATION   // Suggest order cancellations
+  PRICING_RECOMMENDATION  // Suggest price changes
+}
+
+enum SuggestionPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum SuggestionStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  PARTIALLY_ACCEPTED
+}
+
+enum GeneratedPlanType {
+  OTB_PLAN
+  BUDGET_PLAN
+  MARKDOWN_PLAN
+  RECEIPT_PLAN
+}
+
+enum GeneratedPlanStatus {
+  DRAFT
+  REVIEWING
+  APPROVED
+  APPLIED
+  REJECTED
+  EXPIRED
+}
+
+enum PredictiveAlertType {
+  STOCKOUT_RISK           // Risk of running out of stock
+  OVERSTOCK_RISK          // Risk of excess inventory
+  MARGIN_DECLINE          // Projected margin decrease
+  TREND_REVERSAL          // Sales trend changing direction
+  DEMAND_SPIKE            // Unexpected demand increase
+  SLOW_MOVING             // Items becoming slow sellers
+  SEASON_END_RISK         // End of season inventory risk
+  BUDGET_OVERRUN          // Budget likely to be exceeded
+}
+
+enum PredictiveAlertStatus {
+  ACTIVE
+  ACKNOWLEDGED
+  RESOLVED
+  EXPIRED
+  FALSE_POSITIVE
+}
+
+// ============================================
+// SPRINT 6 - INTEGRATIONS
+// ============================================
+
+// SSO Provider Types
+enum SSOProvider {
+  GOOGLE
+  MICROSOFT
+  OKTA
+  AUTH0
+  SAML_CUSTOM
+}
+
+// File Categories
+enum FileCategory {
+  IMPORT
+  EXPORT
+  DOCUMENT
+  IMAGE
+  BACKUP
+  TEMP
+}
+
+// ERP Types
+enum ERPType {
+  SAP_B1
+  SAP_HANA
+  ORACLE_NETSUITE
+  MICROSOFT_DYNAMICS
+  CSV_IMPORT
+  API_CUSTOM
+}
+
+// Sync Direction
+enum SyncDirection {
+  INBOUND
+  OUTBOUND
+  BIDIRECTIONAL
+}
+
+// Sync Status
+enum SyncStatus {
+  SUCCESS
+  PARTIAL
+  FAILED
+  IN_PROGRESS
+}
+
+// Webhook Delivery Status
+enum DeliveryStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  RETRYING
+}
+
+// Realtime Notification Type
+enum RealtimeNotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+  APPROVAL_REQUEST
+  APPROVAL_COMPLETED
+  SYNC_COMPLETED
+  EXPORT_READY
+  AI_SUGGESTION
+}
+
+// External Account Links (for SSO - NextAuth)
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+// SSO Configuration
+model SSOConfig {
+  id              String      @id @default(cuid())
+
+  provider        SSOProvider
+  name            String
+
+  // OAuth Config
+  clientId        String?
+  clientSecret    String?     @db.Text
+
+  // SAML Config
+  entryPoint      String?
+  issuer          String?
+  certificate     String?     @db.Text
+
+  // Settings
+  isEnabled       Boolean     @default(false)
+  autoProvision   Boolean     @default(true)
+  defaultRole     UserRole    @default(BRAND_PLANNER)
+
+  // Domain restriction
+  allowedDomains  String[]
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("sso_configs")
+}
+
+// File Storage
+model StoredFile {
+  id              String       @id @default(cuid())
+
+  filename        String
+  originalName    String
+  mimeType        String
+  size            Int
+
+  // S3 location
+  bucket          String
+  key             String
+  region          String
+
+  // Metadata
+  category        FileCategory
+  entityType      String?
+  entityId        String?
+
+  // Access
+  isPublic        Boolean      @default(false)
+  expiresAt       DateTime?
+
+  uploadedById    String
+  uploadedBy      User         @relation(fields: [uploadedById], references: [id])
+
+  createdAt       DateTime     @default(now())
+
+  @@index([entityType, entityId])
+  @@index([uploadedById])
+  @@map("stored_files")
+}
+
+// ERP Connection
+model ERPConnection {
+  id              String          @id @default(cuid())
+
+  name            String
+  type            ERPType
+
+  // Connection details (encrypted)
+  host            String
+  port            Int?
+  database        String?
+  username        String?
+  password        String?         @db.Text
+  apiKey          String?         @db.Text
+
+  // Settings
+  isEnabled       Boolean         @default(false)
+  syncDirection   SyncDirection   @default(BIDIRECTIONAL)
+
+  // Last sync info
+  lastSyncAt      DateTime?
+  lastSyncStatus  SyncStatus?
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  syncLogs        ERPSyncLog[]
+  fieldMappings   ERPFieldMapping[]
+
+  @@map("erp_connections")
+}
+
+// ERP Field Mapping
+model ERPFieldMapping {
+  id              String        @id @default(cuid())
+
+  connectionId    String
+  connection      ERPConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  entityType      String
+  sourceField     String
+  targetField     String
+
+  transformation  String?
+  defaultValue    String?
+  isRequired      Boolean       @default(false)
+
+  @@unique([connectionId, entityType, sourceField])
+  @@map("erp_field_mappings")
+}
+
+// ERP Sync Log
+model ERPSyncLog {
+  id              String        @id @default(cuid())
+
+  connectionId    String
+  connection      ERPConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  syncType        String
+  entityType      String
+  direction       SyncDirection
+
+  status          SyncStatus
+
+  recordsTotal    Int           @default(0)
+  recordsSuccess  Int           @default(0)
+  recordsFailed   Int           @default(0)
+
+  errors          Json?
+
+  startedAt       DateTime
+  completedAt     DateTime?
+
+  triggeredById   String?
+  triggeredBy     User?         @relation(fields: [triggeredById], references: [id])
+
+  @@index([connectionId, startedAt])
+  @@map("erp_sync_logs")
+}
+
+// Webhooks
+model Webhook {
+  id              String        @id @default(cuid())
+
+  name            String
+  url             String
+
+  // Authentication
+  secret          String
+  headers         Json?
+
+  // Events
+  events          String[]
+
+  // Settings
+  isEnabled       Boolean       @default(true)
+  retryCount      Int           @default(3)
+  timeoutSeconds  Int           @default(30)
+
+  // Stats
+  lastTriggeredAt DateTime?
+  successCount    Int           @default(0)
+  failureCount    Int           @default(0)
+
+  createdById     String
+  createdBy       User          @relation(fields: [createdById], references: [id])
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  deliveries      WebhookDelivery[]
+
+  @@map("webhooks")
+}
+
+// Webhook Delivery Log
+model WebhookDelivery {
+  id              String         @id @default(cuid())
+
+  webhookId       String
+  webhook         Webhook        @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  event           String
+  payload         Json
+
+  // Response
+  statusCode      Int?
+  responseBody    String?        @db.Text
+  responseTime    Int?
+
+  status          DeliveryStatus
+  attempts        Int            @default(1)
+
+  createdAt       DateTime       @default(now())
+
+  @@index([webhookId, createdAt])
+  @@map("webhook_deliveries")
+}
+
+// API Keys
+model APIKey {
+  id              String        @id @default(cuid())
+
+  name            String
+  key             String        @unique
+  prefix          String
+
+  // Permissions
+  scopes          String[]
+
+  // Limits
+  rateLimit       Int           @default(1000)
+
+  // Stats
+  lastUsedAt      DateTime?
+  usageCount      Int           @default(0)
+
+  // Ownership
+  createdById     String
+  createdBy       User          @relation(fields: [createdById], references: [id])
+
+  isEnabled       Boolean       @default(true)
+  expiresAt       DateTime?
+
+  createdAt       DateTime      @default(now())
+
+  @@map("api_keys")
+}
+
+// Real-time Notifications
+model RealtimeNotification {
+  id              String                    @id @default(cuid())
+
+  userId          String
+  user            User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type            RealtimeNotificationType
+  title           String
+  message         String
+
+  // Link to entity
+  entityType      String?
+  entityId        String?
+  actionUrl       String?
+
+  // Status
+  isRead          Boolean                   @default(false)
+  readAt          DateTime?
+
+  createdAt       DateTime                  @default(now())
+
+  @@index([userId, isRead, createdAt])
+  @@map("realtime_notifications")
+}
