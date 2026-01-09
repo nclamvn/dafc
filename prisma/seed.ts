@@ -98,8 +98,8 @@ async function main() {
     { name: 'Small Leather Goods', code: 'SLG', subs: ['Wallets', 'Card Holders', 'Key Holders', 'Pouches', 'Phone Cases', 'Passport Holders'] },
   ];
 
-  const categories: Record<string, typeof prisma.category.$inferSelect> = {};
-  const subcategories: Record<string, typeof prisma.subcategory.$inferSelect> = {};
+  const categories: Record<string, { id: string; code: string }> = {};
+  const subcategories: Record<string, { id: string; code: string }> = {};
 
   for (const cat of categoriesData) {
     const category = await prisma.category.upsert({
@@ -254,7 +254,7 @@ async function main() {
     { brand: hugoboss, budget: 2100000 },
   ];
 
-  const budgets: typeof prisma.budgetAllocation.$inferSelect[] = [];
+  const budgets: { id: string; brandId: string }[] = [];
   for (const bd of budgetData) {
     const budget = await prisma.budgetAllocation.upsert({
       where: { seasonId_brandId_locationId_version: { seasonId: ss25.id, brandId: bd.brand.id, locationId: mainLocation.id, version: 1 } },
