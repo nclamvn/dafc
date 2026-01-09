@@ -9,7 +9,7 @@ services:
     name: dafc-otb-platform
     runtime: node
     plan: free
-    buildCommand: npm ci --include=dev && npx prisma generate && npm run build
+    buildCommand: npm ci --include=dev && npx prisma generate && npx prisma db push --skip-generate && npm run build
     startCommand: npm start
     healthCheckPath: /api/v1/health
     envVars:
@@ -20,8 +20,12 @@ services:
           name: dafc-db
           property: connectionString
       - key: NEXTAUTH_URL
-        sync: false
+        value: https://dafc-otb-platform.onrender.com
+      - key: AUTH_URL
+        value: https://dafc-otb-platform.onrender.com
       - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: AUTH_SECRET
         generateValue: true
       - key: OPENAI_API_KEY
         sync: false
