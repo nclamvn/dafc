@@ -1,5 +1,5 @@
 // AI Module Exports
-export * from './claude';
+export * from './openai';
 export * from './prompts';
 export * from './processors';
 export * from './tools';
@@ -7,7 +7,7 @@ export * from './hooks';
 
 // AI Configuration
 export const AI_CONFIG = {
-  model: 'claude-sonnet-4-20250514',
+  model: 'gpt-4o',
   maxTokens: 4096,
   temperature: 0.7,
   maxSteps: 5,

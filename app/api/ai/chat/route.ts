@@ -1,5 +1,5 @@
 import { streamText, tool } from 'ai';
-import { anthropic } from '@ai-sdk/anthropic';
+import { openai } from '@ai-sdk/openai';
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
@@ -222,7 +222,7 @@ export async function POST(request: Request) {
 
     // Stream response with Vercel AI SDK
     const result = streamText({
-      model: anthropic('claude-sonnet-4-20250514'),
+      model: openai('gpt-4o'),
       system: systemPromptWithLang,
       messages,
       tools,

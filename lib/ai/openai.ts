@@ -1,16 +1,16 @@
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import { PROMPTS } from './prompts';
 
-// Initialize Anthropic client
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || '',
 });
 
 // Model selection based on task complexity
 export const MODELS = {
-  FAST: 'claude-3-5-haiku-20241022',    // Quick validations, classifications
-  STANDARD: 'claude-sonnet-4-20250514', // Analysis, chat, comments
-  ADVANCED: 'claude-opus-4-20250514',   // Complex reasoning, summaries
+  FAST: 'gpt-4o-mini',           // Quick validations, classifications
+  STANDARD: 'gpt-4o',            // Analysis, chat, comments
+  ADVANCED: 'gpt-4o',            // Complex reasoning, summaries
 } as const;
 
 export type ModelType = keyof typeof MODELS;
@@ -84,11 +84,15 @@ export async function generateOTBProposal(context: {
   const startTime = Date.now();
 
   try {
-    const response = await anthropic.messages.create({
+    const response = await openai.chat.completions.create({
       model: MODELS.STANDARD,
       max_tokens: 4096,
-      system: PROMPTS.SYSTEM_PROPOSAL,
+      response_format: { type: 'json_object' },
       messages: [
+        {
+          role: 'system',
+          content: PROMPTS.SYSTEM_PROPOSAL,
+        },
         {
           role: 'user',
           content: `
@@ -121,21 +125,13 @@ Return response as JSON with this structure:
     });
 
     const _latencyMs = Date.now() - startTime;
-    const textContent = response.content.find((c) => c.type === 'text');
+    const content = response.choices[0]?.message?.content;
 
-    if (!textContent || textContent.type !== 'text') {
-      throw new Error('No text content in response');
+    if (!content) {
+      throw new Error('No content in response');
     }
 
-    // Parse JSON from response
-    const jsonMatch = textContent.text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('Could not parse JSON from response');
-    }
-
-    const result = JSON.parse(jsonMatch[0]) as AIProposalResponse;
-
-    // Performance metric: latencyMs
+    const result = JSON.parse(content) as AIProposalResponse;
     return result;
   } catch (error) {
     console.error('Error generating OTB proposal:', error);
@@ -153,11 +149,15 @@ export async function generateComments(context: {
   variance: number;
 }): Promise<AICommentResponse> {
   try {
-    const response = await anthropic.messages.create({
+    const response = await openai.chat.completions.create({
       model: MODELS.STANDARD,
       max_tokens: 1024,
-      system: PROMPTS.COMMENT_GENERATOR,
+      response_format: { type: 'json_object' },
       messages: [
+        {
+          role: 'system',
+          content: PROMPTS.COMMENT_GENERATOR,
+        },
         {
           role: 'user',
           content: `
@@ -181,17 +181,12 @@ Return as JSON:
       ],
     });
 
-    const textContent = response.content.find((c) => c.type === 'text');
-    if (!textContent || textContent.type !== 'text') {
-      throw new Error('No text content in response');
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('No content in response');
     }
 
-    const jsonMatch = textContent.text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('Could not parse JSON from response');
-    }
-
-    return JSON.parse(jsonMatch[0]) as AICommentResponse;
+    return JSON.parse(content) as AICommentResponse;
   } catch (error) {
     console.error('Error generating comments:', error);
     throw error;
@@ -216,11 +211,15 @@ export async function generateExecutiveSummary(context: {
   anomalies: string[];
 }): Promise<AISummaryResponse> {
   try {
-    const response = await anthropic.messages.create({
+    const response = await openai.chat.completions.create({
       model: MODELS.ADVANCED,
       max_tokens: 2048,
-      system: PROMPTS.EXECUTIVE_SUMMARY,
+      response_format: { type: 'json_object' },
       messages: [
+        {
+          role: 'system',
+          content: PROMPTS.EXECUTIVE_SUMMARY,
+        },
         {
           role: 'user',
           content: `
@@ -260,17 +259,12 @@ Return as JSON:
       ],
     });
 
-    const textContent = response.content.find((c) => c.type === 'text');
-    if (!textContent || textContent.type !== 'text') {
-      throw new Error('No text content in response');
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('No content in response');
     }
 
-    const jsonMatch = textContent.text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('Could not parse JSON from response');
-    }
-
-    return JSON.parse(jsonMatch[0]) as AISummaryResponse;
+    return JSON.parse(content) as AISummaryResponse;
   } catch (error) {
     console.error('Error generating executive summary:', error);
     throw error;
@@ -295,11 +289,15 @@ export async function enrichSKU(context: {
   }[];
 }): Promise<SKUEnrichmentResponse> {
   try {
-    const response = await anthropic.messages.create({
+    const response = await openai.chat.completions.create({
       model: MODELS.STANDARD,
       max_tokens: 1024,
-      system: PROMPTS.SKU_ENRICHMENT,
+      response_format: { type: 'json_object' },
       messages: [
+        {
+          role: 'system',
+          content: PROMPTS.SKU_ENRICHMENT,
+        },
         {
           role: 'user',
           content: `
@@ -331,17 +329,12 @@ Return as JSON:
       ],
     });
 
-    const textContent = response.content.find((c) => c.type === 'text');
-    if (!textContent || textContent.type !== 'text') {
-      throw new Error('No text content in response');
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('No content in response');
     }
 
-    const jsonMatch = textContent.text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('Could not parse JSON from response');
-    }
-
-    return JSON.parse(jsonMatch[0]) as SKUEnrichmentResponse;
+    return JSON.parse(content) as SKUEnrichmentResponse;
   } catch (error) {
     console.error('Error enriching SKU:', error);
     throw error;
@@ -369,22 +362,24 @@ export async function chat(
 ${context.additionalData ? `- Additional Data: ${JSON.stringify(context.additionalData)}` : ''}`;
     }
 
-    const response = await anthropic.messages.create({
+    const response = await openai.chat.completions.create({
       model: MODELS.STANDARD,
       max_tokens: 2048,
-      system: systemPrompt,
-      messages: messages.map((m) => ({
-        role: m.role,
-        content: m.content,
-      })),
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages.map((m) => ({
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+        })),
+      ],
     });
 
-    const textContent = response.content.find((c) => c.type === 'text');
-    if (!textContent || textContent.type !== 'text') {
-      throw new Error('No text content in response');
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('No content in response');
     }
 
-    return textContent.text;
+    return content;
   } catch (error) {
     console.error('Error in chat:', error);
     throw error;
@@ -403,7 +398,6 @@ export interface AIInteractionLog {
 
 export async function logAIInteraction(_log: AIInteractionLog): Promise<void> {
   // TODO: In production, store to database for analytics
-  // Silently ignore for now
 }
 
 // Quick classification (using fast model)
@@ -412,9 +406,10 @@ export async function classify(
   categories: string[]
 ): Promise<{ category: string; confidence: number }> {
   try {
-    const response = await anthropic.messages.create({
+    const response = await openai.chat.completions.create({
       model: MODELS.FAST,
       max_tokens: 256,
+      response_format: { type: 'json_object' },
       messages: [
         {
           role: 'user',
@@ -427,17 +422,12 @@ Return JSON: { "category": "string", "confidence": number (0-100) }`,
       ],
     });
 
-    const textContent = response.content.find((c) => c.type === 'text');
-    if (!textContent || textContent.type !== 'text') {
-      throw new Error('No text content in response');
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('No content in response');
     }
 
-    const jsonMatch = textContent.text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('Could not parse JSON from response');
-    }
-
-    return JSON.parse(jsonMatch[0]);
+    return JSON.parse(content);
   } catch (error) {
     console.error('Error classifying:', error);
     throw error;

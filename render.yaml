@@ -23,5 +23,5 @@ services:
         sync: false
       - key: NEXTAUTH_SECRET
         generateValue: true
-      - key: ANTHROPIC_API_KEY
+      - key: OPENAI_API_KEY
         sync: false
