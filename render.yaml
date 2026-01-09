@@ -23,8 +23,6 @@ services:
         value: https://dafc-otb-platform.onrender.com
       - key: AUTH_URL
         value: https://dafc-otb-platform.onrender.com
-      - key: NEXTAUTH_SECRET
-        generateValue: true
       - key: AUTH_SECRET
         generateValue: true
       - key: OPENAI_API_KEY
