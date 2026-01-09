@@ -228,19 +228,19 @@ export default function OTBAnalysisPage() {
       header: t('columnPlannedAmount'),
       cell: ({ row }) => (
         <span className="font-medium">
-          ${row.original.summary.totalPlannedAmount.toLocaleString()}
+          ${(row.original.summary?.totalPlannedAmount ?? 0).toLocaleString()}
         </span>
       ),
     },
     {
       accessorKey: 'summary.totalPlannedUnits',
       header: t('columnUnits'),
-      cell: ({ row }) => row.original.summary.totalPlannedUnits.toLocaleString(),
+      cell: ({ row }) => (row.original.summary?.totalPlannedUnits ?? 0).toLocaleString(),
     },
     {
       accessorKey: 'summary.avgMargin',
       header: t('columnAvgMargin'),
-      cell: ({ row }) => `${row.original.summary.avgMargin.toFixed(1)}%`,
+      cell: ({ row }) => `${(row.original.summary?.avgMargin ?? 0).toFixed(1)}%`,
     },
     {
       accessorKey: 'status',
