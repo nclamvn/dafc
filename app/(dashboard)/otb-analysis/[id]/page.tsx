@@ -29,7 +29,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { PageHeader } from '@/components/shared/page-header';
-import { OTBHierarchyTable } from '@/components/otb/otb-hierarchy-table';
+import { OTBHierarchyTable, OTBCalculator, OTBSummary } from '@/components/otb';
 import { OTB_STATUS_LABELS, OTB_VERSION_LABELS, Category } from '@/types';
 
 interface LineItem {
@@ -497,14 +497,18 @@ export default function OTBPlanDetailPage({
 
           {/* Tabs for different views */}
           <Tabs defaultValue="hierarchy" className="w-full">
-            <TabsList>
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="hierarchy" className="gap-2">
                 <BarChart3 className="h-4 w-4" />
-                Hierarchy View
+                Hierarchy
+              </TabsTrigger>
+              <TabsTrigger value="calculator" className="gap-2">
+                <BarChart3 className="h-4 w-4" />
+                OTB Calculator
               </TabsTrigger>
               <TabsTrigger value="sizing" className="gap-2">
                 <Sparkles className="h-4 w-4" />
-                Sizing Analysis
+                Sizing
               </TabsTrigger>
             </TabsList>
 
@@ -517,6 +521,24 @@ export default function OTBPlanDetailPage({
                 onLineItemsChange={handleLineItemsChange}
                 onGenerateAI={handleGenerateAI}
                 isGeneratingAI={isGeneratingAI}
+              />
+            </TabsContent>
+
+            <TabsContent value="calculator" className="mt-4">
+              <OTBCalculator
+                totalBudget={Number(plan.budget.totalBudget)}
+                initialInputs={{
+                  plannedSales: lineItems.reduce((sum, item) => sum + item.plannedAmount, 0) * 0.6,
+                  plannedMarkdowns: lineItems.reduce((sum, item) => sum + item.plannedAmount, 0) * 0.1,
+                  plannedEOMInventory: Number(plan.budget.totalBudget) * 0.35,
+                  bomInventory: Number(plan.budget.totalBudget) * 0.3,
+                  onOrder: lineItems.reduce((sum, item) => sum + item.plannedAmount, 0) * 0.15,
+                }}
+                readOnly={!isEditable}
+                onSave={(inputs, otbValue) => {
+                  console.log('OTB Saved:', { inputs, otbValue });
+                  toast.success(`OTB calculation saved: ${otbValue.toLocaleString()}`);
+                }}
               />
             </TabsContent>
 
@@ -538,6 +560,19 @@ export default function OTBPlanDetailPage({
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* OTB Summary Widget */}
+          <OTBSummary
+            data={{
+              totalBudget: Number(plan.budget.totalBudget),
+              plannedSales: lineItems.reduce((sum, item) => sum + item.plannedAmount, 0) * 0.6,
+              plannedMarkdowns: lineItems.reduce((sum, item) => sum + item.plannedAmount, 0) * 0.1,
+              plannedEOMInventory: Number(plan.budget.totalBudget) * 0.35,
+              bomInventory: Number(plan.budget.totalBudget) * 0.3,
+              onOrder: lineItems.reduce((sum, item) => sum + item.plannedAmount, 0) * 0.15,
+            }}
+            period={plan.budget.season.code}
+          />
+
           {/* Workflow Status */}
           {plan.workflow && (
             <Card>
