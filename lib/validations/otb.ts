@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const otbPlanCreateSchema = z.object({
   budgetId: z.string().min(1, 'Budget is required'),
   name: z.string().min(1, 'Name is required').optional(),
-  versionType: z.enum(['V0_SYSTEM', 'V1_USER', 'V2_ADJUSTED', 'V3_REVIEWED', 'VA_APPROVED', 'VF_FINAL']).default('V0_SYSTEM'),
+  versionType: z.enum(['V0_SYSTEM', 'V1_USER', 'V2_ADJUSTED', 'V3_REVIEWED', 'VA_APPROVED', 'VF_FINAL', 'REVISED']).default('V0_SYSTEM'),
 });
 
 export type OTBPlanCreateData = z.infer<typeof otbPlanCreateSchema>;
