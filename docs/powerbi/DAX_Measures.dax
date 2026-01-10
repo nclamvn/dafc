@@ -1,0 +1,302 @@
+// ============================================
+// DAFC OTB Platform - DAX Measures
+// ============================================
+// Copy these measures into your Power BI model
+// Go to: Modeling > New Measure > paste code
+// ============================================
+
+
+// ============================================
+// BUDGET MEASURES
+// ============================================
+
+// Total Budget Amount
+Total Budget =
+SUM('Budget'[total_budget])
+
+// Seasonal Budget Total
+Seasonal Budget =
+SUM('Budget'[seasonal_budget])
+
+// Replenishment Budget Total
+Replenishment Budget =
+SUM('Budget'[replenishment_budget])
+
+// Budget Utilization Percentage
+Budget Utilization % =
+DIVIDE(
+    [Seasonal Budget] + [Replenishment Budget],
+    [Total Budget],
+    0
+) * 100
+
+// Average Budget per Brand
+Avg Budget per Brand =
+AVERAGEX(
+    VALUES('Budget'[brand_name]),
+    CALCULATE([Total Budget])
+)
+
+// Budget Count by Status
+Budget Count =
+COUNTROWS('Budget')
+
+// Approved Budgets
+Approved Budgets =
+CALCULATE(
+    [Budget Count],
+    'Budget'[status] = "APPROVED"
+)
+
+// Pending Approval Budgets
+Pending Budgets =
+CALCULATE(
+    [Budget Count],
+    'Budget'[status] IN {"DRAFT", "SUBMITTED", "UNDER_REVIEW"}
+)
+
+// Budget Approval Rate
+Approval Rate % =
+DIVIDE(
+    [Approved Budgets],
+    [Budget Count],
+    0
+) * 100
+
+
+// ============================================
+// SKU MEASURES
+// ============================================
+
+// Total SKU Count
+SKU Count =
+COUNTROWS('SKU')
+
+// Total Order Quantity
+Total Order Qty =
+SUM('SKU'[order_quantity])
+
+// Total Order Value
+Total Order Value =
+SUM('SKU'[order_value])
+
+// Average Retail Price
+Avg Retail Price =
+AVERAGE('SKU'[retail_price])
+
+// Average Cost Price
+Avg Cost Price =
+AVERAGE('SKU'[cost_price])
+
+// Average Margin Percentage
+Avg Margin % =
+AVERAGE('SKU'[margin_percent])
+
+// Weighted Average Margin (by order value)
+Weighted Avg Margin % =
+DIVIDE(
+    SUMX('SKU', 'SKU'[margin_percent] * 'SKU'[order_value]),
+    [Total Order Value],
+    0
+)
+
+// High Margin SKUs (> 50%)
+High Margin SKUs =
+CALCULATE(
+    [SKU Count],
+    'SKU'[margin_percent] > 50
+)
+
+// Low Margin SKUs (< 30%)
+Low Margin SKUs =
+CALCULATE(
+    [SKU Count],
+    'SKU'[margin_percent] < 30
+)
+
+// SKUs Pending Validation
+SKUs Pending =
+CALCULATE(
+    [SKU Count],
+    'SKU'[validation_status] = "PENDING"
+)
+
+// SKUs Validated
+SKUs Validated =
+CALCULATE(
+    [SKU Count],
+    'SKU'[validation_status] = "VALIDATED"
+)
+
+// Validation Rate
+Validation Rate % =
+DIVIDE(
+    [SKUs Validated],
+    [SKU Count],
+    0
+) * 100
+
+// New SKUs (flagged as new)
+New SKUs =
+CALCULATE(
+    [SKU Count],
+    'SKU'[is_new] = TRUE
+)
+
+// AI Demand Score Average
+Avg AI Demand Score =
+AVERAGE('SKU'[ai_demand_score])
+
+
+// ============================================
+// OTB MEASURES
+// ============================================
+
+// Total OTB Plans
+OTB Plan Count =
+COUNTROWS('OTB')
+
+// Total OTB Value
+Total OTB Value =
+SUM('OTB'[total_otb_value])
+
+// Total User Buy Value
+Total Buy Value =
+SUM('OTB'[total_user_buy])
+
+// Total Historical Value
+Total Historical =
+SUM('OTB'[total_historical_value])
+
+// Total System Proposed Value
+Total System Proposed =
+SUM('OTB'[total_system_proposed])
+
+// Average Variance from Historical
+Avg Variance Historical % =
+AVERAGE('OTB'[variance_from_historical])
+
+// Average Variance from System
+Avg Variance System % =
+AVERAGE('OTB'[variance_from_system])
+
+// Plans with Anomalies
+Plans with Anomalies =
+CALCULATE(
+    [OTB Plan Count],
+    'OTB'[anomaly_count] > 0
+)
+
+// Average AI Confidence
+Avg AI Confidence =
+AVERAGE('OTB'[ai_confidence_score])
+
+// OTB Approved
+OTB Approved =
+CALCULATE(
+    [OTB Plan Count],
+    'OTB'[status] = "APPROVED"
+)
+
+// OTB Approval Rate
+OTB Approval Rate % =
+DIVIDE(
+    [OTB Approved],
+    [OTB Plan Count],
+    0
+) * 100
+
+
+// ============================================
+// TIME INTELLIGENCE MEASURES
+// ============================================
+
+// Budget YTD
+Budget YTD =
+TOTALYTD([Total Budget], 'Calendar'[Date])
+
+// Budget Previous Year
+Budget PY =
+CALCULATE(
+    [Total Budget],
+    SAMEPERIODLASTYEAR('Calendar'[Date])
+)
+
+// Budget YoY Growth
+Budget YoY % =
+DIVIDE(
+    [Total Budget] - [Budget PY],
+    [Budget PY],
+    0
+) * 100
+
+// SKU Count MTD
+SKU Count MTD =
+TOTALMTD([SKU Count], 'Calendar'[Date])
+
+// Order Value Running Total
+Order Value Running =
+CALCULATE(
+    [Total Order Value],
+    FILTER(
+        ALLSELECTED('Calendar'[Date]),
+        'Calendar'[Date] <= MAX('Calendar'[Date])
+    )
+)
+
+
+// ============================================
+// KPI STATUS MEASURES
+// ============================================
+
+// Margin KPI Status (Good/Warning/Critical)
+Margin KPI Status =
+SWITCH(
+    TRUE(),
+    [Avg Margin %] >= 45, "Good",
+    [Avg Margin %] >= 35, "Warning",
+    "Critical"
+)
+
+// Budget Utilization KPI
+Utilization KPI Status =
+SWITCH(
+    TRUE(),
+    [Budget Utilization %] >= 80, "On Track",
+    [Budget Utilization %] >= 60, "Needs Attention",
+    "Behind"
+)
+
+// Approval KPI
+Approval KPI Status =
+SWITCH(
+    TRUE(),
+    [Approval Rate %] >= 90, "Excellent",
+    [Approval Rate %] >= 70, "Good",
+    "Needs Review"
+)
+
+
+// ============================================
+// FORMATTING MEASURES
+// ============================================
+
+// Format Currency
+Budget Display =
+FORMAT([Total Budget], "$#,##0")
+
+// Format Percentage
+Margin Display =
+FORMAT([Avg Margin %], "0.0") & "%"
+
+// Format Large Numbers
+Order Value Display =
+IF(
+    [Total Order Value] >= 1000000,
+    FORMAT([Total Order Value] / 1000000, "0.0") & "M",
+    IF(
+        [Total Order Value] >= 1000,
+        FORMAT([Total Order Value] / 1000, "0.0") & "K",
+        FORMAT([Total Order Value], "#,##0")
+    )
+)
