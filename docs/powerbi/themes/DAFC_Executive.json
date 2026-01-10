@@ -1,0 +1,189 @@
+{
+    "name": "DAFC Executive Dashboard",
+    "dataColors": [
+        "#0F172A",
+        "#D4AF37",
+        "#059669",
+        "#2563EB",
+        "#7C3AED",
+        "#DC2626",
+        "#EA580C",
+        "#0891B2",
+        "#4F46E5",
+        "#BE185D"
+    ],
+    "background": "#F1F5F9",
+    "foreground": "#0F172A",
+    "tableAccent": "#D4AF37",
+    "good": "#059669",
+    "neutral": "#D4AF37",
+    "bad": "#DC2626",
+    "maximum": "#059669",
+    "center": "#D4AF37",
+    "minimum": "#DC2626",
+    "visualStyles": {
+        "*": {
+            "*": {
+                "*": [
+                    {
+                        "fontFamily": "Plus Jakarta Sans, Segoe UI, sans-serif"
+                    }
+                ],
+                "title": [
+                    {
+                        "fontFamily": "Plus Jakarta Sans, Segoe UI, sans-serif",
+                        "fontSize": 16,
+                        "fontColor": {"solid": {"color": "#0F172A"}},
+                        "fontWeight": "700",
+                        "titleWrap": true
+                    }
+                ],
+                "background": [
+                    {
+                        "color": {"solid": {"color": "#FFFFFF"}},
+                        "transparency": 0
+                    }
+                ],
+                "border": [
+                    {
+                        "color": {"solid": {"color": "#E2E8F0"}},
+                        "show": true,
+                        "radius": 8
+                    }
+                ],
+                "dropShadow": [
+                    {
+                        "show": true,
+                        "color": {"solid": {"color": "#000000"}},
+                        "position": "outer",
+                        "preset": "bottomRight",
+                        "transparency": 95
+                    }
+                ]
+            }
+        },
+        "card": {
+            "*": {
+                "calloutValue": [
+                    {
+                        "fontFamily": "Plus Jakarta Sans, Segoe UI, sans-serif",
+                        "fontSize": 36,
+                        "fontWeight": "700",
+                        "color": {"solid": {"color": "#0F172A"}}
+                    }
+                ],
+                "category": [
+                    {
+                        "fontFamily": "Inter, Segoe UI, sans-serif",
+                        "fontSize": 12,
+                        "fontWeight": "500",
+                        "color": {"solid": {"color": "#64748B"}}
+                    }
+                ],
+                "background": [
+                    {
+                        "color": {"solid": {"color": "#FFFFFF"}},
+                        "transparency": 0
+                    }
+                ]
+            }
+        },
+        "lineChart": {
+            "*": {
+                "dataPoint": [
+                    {
+                        "markerSize": 5,
+                        "markers": true
+                    }
+                ],
+                "lineStyles": [
+                    {
+                        "strokeWidth": 3,
+                        "lineStyle": "solid"
+                    }
+                ]
+            }
+        },
+        "barChart": {
+            "*": {
+                "dataPoint": [
+                    {
+                        "transparency": 10
+                    }
+                ]
+            }
+        },
+        "columnChart": {
+            "*": {
+                "dataPoint": [
+                    {
+                        "transparency": 10
+                    }
+                ]
+            }
+        },
+        "gauge": {
+            "*": {
+                "calloutValue": [
+                    {
+                        "fontFamily": "Plus Jakarta Sans, Segoe UI, sans-serif",
+                        "fontSize": 24,
+                        "fontWeight": "700",
+                        "color": {"solid": {"color": "#0F172A"}}
+                    }
+                ],
+                "target": [
+                    {
+                        "color": {"solid": {"color": "#DC2626"}},
+                        "lineWidth": 2
+                    }
+                ]
+            }
+        },
+        "kpi": {
+            "*": {
+                "indicator": [
+                    {
+                        "fontFamily": "Plus Jakarta Sans, Segoe UI, sans-serif",
+                        "fontSize": 32,
+                        "fontWeight": "700"
+                    }
+                ],
+                "trendLine": [
+                    {
+                        "transparency": 30
+                    }
+                ]
+            }
+        }
+    },
+    "textClasses": {
+        "title": {
+            "fontFace": "Plus Jakarta Sans, Segoe UI, sans-serif",
+            "fontSize": 20,
+            "fontWeight": "700",
+            "color": "#0F172A"
+        },
+        "header": {
+            "fontFace": "Plus Jakarta Sans, Segoe UI, sans-serif",
+            "fontSize": 16,
+            "fontWeight": "600",
+            "color": "#0F172A"
+        },
+        "label": {
+            "fontFace": "Inter, Segoe UI, sans-serif",
+            "fontSize": 12,
+            "fontWeight": "500",
+            "color": "#64748B"
+        },
+        "callout": {
+            "fontFace": "Plus Jakarta Sans, Segoe UI, sans-serif",
+            "fontSize": 36,
+            "fontWeight": "700",
+            "color": "#0F172A"
+        }
+    },
+    "page": {
+        "backgroundColor": "#F1F5F9"
+    }
+}

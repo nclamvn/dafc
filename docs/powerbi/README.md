@@ -1,80 +1,185 @@
-# Power BI Resources for DAFC OTB Platform
+# 📊 DAFC OTB Platform - Power BI Resources Package
 
-This folder contains ready-to-use Power BI resources.
+## 🎯 Dành cho đội Power BI
 
-## Quick Start
+Package này chứa tất cả resources cần thiết để kết nối Power BI với DAFC OTB Platform.
 
-### 1. Import Power Query Scripts
+---
 
-1. Open Power BI Desktop
-2. **Home** → **Transform Data** → **New Source** → **Blank Query**
-3. Right-click the query → **Advanced Editor**
-4. Copy & paste content from `.pq` files
-5. Click **Done**
+## 📦 Nội dung Package
 
-### 2. Add DAX Measures
-
-1. In Power BI Desktop, select your data model
-2. **Modeling** → **New Measure**
-3. Copy individual measures from `DAX_Measures.dax`
-4. Paste and press Enter
-
-## Files
-
-| File | Description |
-|------|-------------|
-| `Query_SKU_Performance.pq` | Power Query for SKU data |
-| `Query_Budget_Summary.pq` | Power Query for budget data |
-| `Query_OTB_Analysis.pq` | Power Query for OTB plans |
-| `DAX_Measures.dax` | Collection of DAX measures |
-
-## Configuration
-
-Each `.pq` file has a configuration section at the top:
-
-```powerquery
-// ============================================
-// CONFIGURATION - Edit these values
-// ============================================
-BaseUrl = "https://dafc-otb-platform.onrender.com",
-
-// Optional filters (set to null to skip)
-BrandId = null,      // e.g., "clxxxxx"
-SeasonId = null,     // e.g., "clyyyyy"
+```
+powerbi_resources/
+│
+├── 📄 01_reporting_views_v2.sql    # SQL script tạo reporting views
+│
+├── 📁 connections/
+│   ├── DAFC_PostgreSQL.pbids       # Quick connect file cho PostgreSQL
+│   └── DAFC_REST_API.pbids         # Quick connect file cho REST API
+│
+├── 📁 themes/
+│   ├── DAFC_Corporate.json         # Theme chuẩn công ty
+│   └── DAFC_Executive.json         # Theme cho Executive Dashboard
+│
+├── 📁 queries/
+│   └── PowerQuery_Master_Template.pq   # 15+ Power Query scripts
+│
+├── 📁 measures/
+│   └── DAX_Measures_Complete.dax   # 60+ DAX measures sẵn dùng
+│
+├── 📄 POWERBI_SETUP_GUIDE.md       # Hướng dẫn chi tiết (Tiếng Việt)
+└── 📄 POWERBI_ANALYSIS.md          # Phân tích kỹ thuật
 ```
 
-## Authentication
+---
 
-The API requires authentication. Options:
+## 🚀 Quick Start
 
-1. **Cookie-based**: Get cookie from browser after login
-2. **Anonymous**: If API is configured for public access
+### Bước 1: Deploy SQL Views (DBA thực hiện)
 
-To add authentication in Power BI:
-1. When prompted, select **Web** → **Advanced**
-2. Add HTTP header: `Cookie` with your session cookie value
+```bash
+psql $DATABASE_URL -f 01_reporting_views_v2.sql
+```
 
-## Measure Categories
+**Views được tạo:**
+| Schema | View | Mô tả |
+|--------|------|-------|
+| reporting | dim_brands | Dimension - Brands |
+| reporting | dim_categories | Dimension - Categories |
+| reporting | dim_locations | Dimension - Locations |
+| reporting | dim_seasons | Dimension - Seasons |
+| reporting | dim_users | Dimension - Users (no password) |
+| reporting | dim_date | Dimension - Calendar |
+| reporting | fact_budget_allocations | Fact - Budget data |
+| reporting | agg_budget_by_brand_season | Aggregated summary |
 
-### Budget Measures
-- Total Budget, Seasonal Budget, Replenishment Budget
-- Budget Utilization %, Approval Rate %
+### Bước 2: Kết nối Power BI
 
-### SKU Measures
-- SKU Count, Order Value, Average Margin %
-- Validation Rate, High/Low Margin SKUs
+**Option A: PBIDS file (nhanh nhất)**
+1. Mở `connections/DAFC_PostgreSQL.pbids` bằng Notepad
+2. Thay `dpg-xxx` bằng server thực
+3. Double-click để mở trong Power BI
+4. Nhập credentials
 
-### OTB Measures
-- OTB Plan Count, Total OTB Value
-- Variance from Historical/System
+**Option B: Manual connection**
+```
+Server:   [từ Render Dashboard]
+Database: dafc_otb_production
+Schema:   reporting
+User:     powerbi_reader
+```
 
-### Time Intelligence
-- YTD, MTD, YoY comparisons
-- Running totals
+### Bước 3: Apply Theme
 
-### KPI Status
-- Visual indicators: Good/Warning/Critical
+1. Power BI → View → Themes → Browse
+2. Chọn `themes/DAFC_Corporate.json`
 
-## Need Help?
+### Bước 4: Import Measures
 
-See the main guide: `../POWERBI_CONNECTION_GUIDE.md`
+1. Mở `measures/DAX_Measures_Complete.dax`
+2. Copy từng measure
+3. Modeling → New Measure → Paste
+
+---
+
+## 📊 Database Schema
+
+```
+┌─────────────────┐         ┌─────────────────────┐
+│   dim_brands    │────1:*──│                     │
+├─────────────────┤         │                     │
+│   dim_seasons   │────1:*──│  fact_budget_       │
+├─────────────────┤         │  allocations        │
+│   dim_locations │────1:*──│                     │
+├─────────────────┤         │                     │
+│   dim_users     │────1:*──│                     │
+└─────────────────┘         └─────────────────────┘
+                                    │
+┌─────────────────┐                 │
+│   dim_date      │────1:*──────────┘
+└─────────────────┘
+```
+
+---
+
+## 🎨 Theme Colors
+
+### DAFC Corporate
+| Color | Hex | Usage |
+|-------|-----|-------|
+| Primary Navy | #1E3A5F | Headers, titles |
+| Accent Gold | #D4AF37 | Highlights, KPIs |
+| Success | #22C55E | Positive values |
+| Warning | #F59E0B | Attention items |
+| Error | #EF4444 | Negative values |
+
+---
+
+## 📈 Key Measures (Preview)
+
+```dax
+// Revenue
+Total Budget = SUM(fact_budget_allocations[total_budget])
+
+// Utilization
+Budget Utilization % = DIVIDE([Allocated Budget], [Total Budget], 0)
+
+// YoY Growth
+YoY Growth = 
+VAR CY = [Total Budget]
+VAR PY = CALCULATE([Total Budget], SAMEPERIODLASTYEAR(dim_date[full_date]))
+RETURN DIVIDE(CY - PY, PY, 0)
+
+// KPI Color
+Status Color = 
+SWITCH(TRUE(),
+    [Budget Utilization %] >= 0.9, "#22C55E",
+    [Budget Utilization %] >= 0.7, "#F59E0B",
+    "#EF4444"
+)
+```
+
+---
+
+## 🔗 API Endpoints (Alternative)
+
+Nếu không thể kết nối trực tiếp DB:
+
+| Endpoint | Method | Format |
+|----------|--------|--------|
+| `/api/export/sku-performance` | GET | JSON/CSV |
+| `/api/export/budget-summary` | GET | JSON/CSV |
+| `/api/export/otb-analysis` | GET | JSON/CSV |
+
+**Parameters:**
+- `format`: json, csv, odata
+- `page`: 1, 2, 3...
+- `pageSize`: 100-10000
+
+---
+
+## 📞 Support
+
+| Type | Contact |
+|------|---------|
+| Technical Issues | Đội Dev DAFC |
+| Power BI Questions | Đội BI DAFC |
+| Data Questions | Data Team |
+
+---
+
+## ✅ Checklist
+
+- [ ] SQL views deployed
+- [ ] Power BI connected
+- [ ] Theme applied
+- [ ] Measures imported
+- [ ] Relationships created
+- [ ] Report designed
+- [ ] Published to Service
+- [ ] Scheduled refresh configured
+
+---
+
+**Version:** 1.0  
+**Date:** 2026-01-10

@@ -1,0 +1,513 @@
+// =====================================================
+// DAFC OTB Platform - DAX Measures Library
+// =====================================================
+//
+// HOW TO USE:
+// 1. Open Power BI Desktop
+// 2. Go to Modeling → New Measure
+// 3. Copy a measure below and paste
+// 4. Press Enter to create
+//
+// ORGANIZATION:
+// 1. Revenue & Sales Measures
+// 2. Budget Measures
+// 3. OTB Measures
+// 4. Time Intelligence
+// 5. Ranking & Top N
+// 6. KPI & Conditional
+// 7. Formatting Helpers
+//
+// =====================================================
+
+
+// =====================================================
+// 1. REVENUE & SALES MEASURES
+// =====================================================
+
+// Total Revenue
+Total Revenue = 
+SUMX(
+    fact_budget_allocations,
+    fact_budget_allocations[total_budget]
+)
+
+// Total Units Sold
+Total Units = 
+SUM(fact_sku_performance[quantity])
+
+// Average Unit Price
+Avg Unit Price = 
+DIVIDE(
+    [Total Revenue],
+    [Total Units],
+    0
+)
+
+// Gross Margin
+Gross Margin = 
+SUMX(
+    fact_sku_performance,
+    fact_sku_performance[quantity] * 
+    (fact_sku_performance[retail_price] - fact_sku_performance[unit_cost])
+)
+
+// Gross Margin %
+Gross Margin % = 
+DIVIDE(
+    [Gross Margin],
+    [Total Revenue],
+    0
+)
+
+// Transaction Count
+Transaction Count = 
+COUNTROWS(fact_budget_allocations)
+
+// Average Transaction Value
+Avg Transaction Value = 
+DIVIDE(
+    [Total Revenue],
+    [Transaction Count],
+    0
+)
+
+
+// =====================================================
+// 2. BUDGET MEASURES
+// =====================================================
+
+// Total Budget
+Total Budget = 
+SUM(fact_budget_allocations[total_budget])
+
+// Seasonal Budget
+Seasonal Budget = 
+SUM(fact_budget_allocations[seasonal_budget])
+
+// Replenishment Budget
+Replenishment Budget = 
+SUM(fact_budget_allocations[replenishment_budget])
+
+// Allocated Budget
+Allocated Budget = 
+CALCULATE(
+    [Total Budget],
+    fact_budget_allocations[status] IN {"APPROVED", "SUBMITTED"}
+)
+
+// Pending Budget
+Pending Budget = 
+CALCULATE(
+    [Total Budget],
+    fact_budget_allocations[status] = "SUBMITTED"
+)
+
+// Approved Budget
+Approved Budget = 
+CALCULATE(
+    [Total Budget],
+    fact_budget_allocations[status] = "APPROVED"
+)
+
+// Draft Budget
+Draft Budget = 
+CALCULATE(
+    [Total Budget],
+    fact_budget_allocations[status] = "DRAFT"
+)
+
+// Budget Utilization %
+Budget Utilization % = 
+DIVIDE(
+    [Allocated Budget],
+    [Total Budget],
+    0
+)
+
+// Remaining Budget
+Remaining Budget = 
+[Total Budget] - [Allocated Budget]
+
+// Budget Approval Rate
+Approval Rate % = 
+DIVIDE(
+    CALCULATE(COUNTROWS(fact_budget_allocations), fact_budget_allocations[status] = "APPROVED"),
+    COUNTROWS(fact_budget_allocations),
+    0
+)
+
+// Budget by Status (for matrix)
+Budget Status Count = 
+COUNTROWS(fact_budget_allocations)
+
+
+// =====================================================
+// 3. OTB MEASURES
+// =====================================================
+
+// Opening Stock Value
+Opening Stock = 
+SUM(fact_otb_analysis[opening_stock])
+
+// Planned Receipts
+Planned Receipts = 
+SUM(fact_otb_analysis[planned_receipts])
+
+// Planned Sales
+Planned Sales = 
+SUM(fact_otb_analysis[planned_sales])
+
+// Closing Stock
+Closing Stock = 
+SUM(fact_otb_analysis[closing_stock])
+
+// OTB Value (Open-To-Buy)
+OTB Value = 
+[Planned Sales] - [Opening Stock] + [Closing Stock] - [Planned Receipts]
+
+// OTB Variance
+OTB Variance = 
+SUM(fact_otb_analysis[otb_value]) - SUM(fact_otb_analysis[planned_value])
+
+// OTB Variance %
+OTB Variance % = 
+DIVIDE(
+    [OTB Variance],
+    SUM(fact_otb_analysis[planned_value]),
+    0
+)
+
+// Stock Turn Rate
+Stock Turn = 
+DIVIDE(
+    [Planned Sales],
+    AVERAGE(fact_otb_analysis[opening_stock]),
+    0
+)
+
+// Weeks of Supply
+Weeks of Supply = 
+DIVIDE(
+    [Closing Stock],
+    [Planned Sales] / 52,
+    0
+)
+
+
+// =====================================================
+// 4. TIME INTELLIGENCE
+// =====================================================
+
+// YTD Revenue
+Revenue YTD = 
+TOTALYTD(
+    [Total Revenue],
+    dim_date[full_date]
+)
+
+// MTD Revenue
+Revenue MTD = 
+TOTALMTD(
+    [Total Revenue],
+    dim_date[full_date]
+)
+
+// QTD Revenue
+Revenue QTD = 
+TOTALQTD(
+    [Total Revenue],
+    dim_date[full_date]
+)
+
+// Previous Year Revenue
+Revenue PY = 
+CALCULATE(
+    [Total Revenue],
+    SAMEPERIODLASTYEAR(dim_date[full_date])
+)
+
+// YoY Growth
+YoY Growth = 
+VAR CurrentYear = [Total Revenue]
+VAR PreviousYear = [Revenue PY]
+RETURN
+DIVIDE(
+    CurrentYear - PreviousYear,
+    PreviousYear,
+    0
+)
+
+// YoY Growth %
+YoY Growth % = 
+FORMAT([YoY Growth], "0.0%")
+
+// Previous Month Revenue
+Revenue PM = 
+CALCULATE(
+    [Total Revenue],
+    DATEADD(dim_date[full_date], -1, MONTH)
+)
+
+// MoM Growth
+MoM Growth = 
+VAR CurrentMonth = [Total Revenue]
+VAR PreviousMonth = [Revenue PM]
+RETURN
+DIVIDE(
+    CurrentMonth - PreviousMonth,
+    PreviousMonth,
+    0
+)
+
+// Rolling 3 Month Average
+Rolling 3M Avg = 
+AVERAGEX(
+    DATESINPERIOD(
+        dim_date[full_date],
+        MAX(dim_date[full_date]),
+        -3,
+        MONTH
+    ),
+    [Total Revenue]
+)
+
+// Rolling 12 Month Total
+Rolling 12M Total = 
+CALCULATE(
+    [Total Revenue],
+    DATESINPERIOD(
+        dim_date[full_date],
+        MAX(dim_date[full_date]),
+        -12,
+        MONTH
+    )
+)
+
+// Same Period Last Year YTD
+Revenue PYTD = 
+CALCULATE(
+    [Revenue YTD],
+    SAMEPERIODLASTYEAR(dim_date[full_date])
+)
+
+
+// =====================================================
+// 5. RANKING & TOP N
+// =====================================================
+
+// Brand Rank by Revenue
+Brand Rank = 
+RANKX(
+    ALL(dim_brands[name]),
+    [Total Revenue],
+    ,
+    DESC,
+    DENSE
+)
+
+// Category Rank by Revenue
+Category Rank = 
+RANKX(
+    ALL(dim_categories[name]),
+    [Total Revenue],
+    ,
+    DESC,
+    DENSE
+)
+
+// Top 10 Brands Flag
+Is Top 10 Brand = 
+IF([Brand Rank] <= 10, 1, 0)
+
+// Top 5 Category Revenue
+Top 5 Category Revenue = 
+CALCULATE(
+    [Total Revenue],
+    TOPN(5, ALL(dim_categories), [Total Revenue], DESC)
+)
+
+// Brand % of Total
+Brand % of Total = 
+DIVIDE(
+    [Total Revenue],
+    CALCULATE([Total Revenue], ALL(dim_brands)),
+    0
+)
+
+// Cumulative Revenue (Running Total)
+Cumulative Revenue = 
+CALCULATE(
+    [Total Revenue],
+    FILTER(
+        ALLSELECTED(dim_date[full_date]),
+        dim_date[full_date] <= MAX(dim_date[full_date])
+    )
+)
+
+
+// =====================================================
+// 6. KPI & CONDITIONAL MEASURES
+// =====================================================
+
+// Budget Status Color
+Budget Status Color = 
+SWITCH(
+    TRUE(),
+    [Budget Utilization %] >= 0.9, "#22C55E",  // Green - Good
+    [Budget Utilization %] >= 0.7, "#F59E0B",  // Yellow - Warning
+    [Budget Utilization %] >= 0.5, "#F97316",  // Orange - Attention
+    "#EF4444"  // Red - Critical
+)
+
+// YoY Trend Icon
+YoY Trend Icon = 
+IF(
+    [YoY Growth] > 0,
+    "▲",
+    IF([YoY Growth] < 0, "▼", "◆")
+)
+
+// YoY Trend Color
+YoY Trend Color = 
+IF(
+    [YoY Growth] > 0,
+    "#22C55E",
+    IF([YoY Growth] < 0, "#EF4444", "#64748B")
+)
+
+// OTB Health Status
+OTB Health = 
+SWITCH(
+    TRUE(),
+    [OTB Variance %] >= 0.1, "Over Budget",
+    [OTB Variance %] >= -0.05, "On Track",
+    [OTB Variance %] >= -0.1, "Slightly Under",
+    "Under Budget"
+)
+
+// OTB Health Color
+OTB Health Color = 
+SWITCH(
+    [OTB Health],
+    "On Track", "#22C55E",
+    "Slightly Under", "#F59E0B",
+    "Under Budget", "#EF4444",
+    "Over Budget", "#3B82F6",
+    "#64748B"
+)
+
+// Approval Status Emoji
+Approval Emoji = 
+SWITCH(
+    SELECTEDVALUE(fact_budget_allocations[status]),
+    "APPROVED", "✅",
+    "SUBMITTED", "⏳",
+    "REJECTED", "❌",
+    "DRAFT", "📝",
+    "📋"
+)
+
+
+// =====================================================
+// 7. FORMATTING HELPERS
+// =====================================================
+
+// Format as Currency (USD)
+Revenue Formatted = 
+FORMAT([Total Revenue], "$#,##0")
+
+// Format as Currency (VND)
+Revenue VND Formatted = 
+FORMAT([Total Revenue] * 24000, "#,##0 ₫")
+
+// Format as Percentage
+Utilization Formatted = 
+FORMAT([Budget Utilization %], "0.0%")
+
+// Format as Millions
+Revenue in Millions = 
+FORMAT([Total Revenue] / 1000000, "0.0M")
+
+// Format with Trend Arrow
+YoY with Arrow = 
+VAR Growth = [YoY Growth]
+VAR Arrow = IF(Growth > 0, "↑", IF(Growth < 0, "↓", "→"))
+VAR Color = IF(Growth > 0, "green", IF(Growth < 0, "red", "gray"))
+RETURN
+Arrow & " " & FORMAT(ABS(Growth), "0.0%")
+
+// Sparkline Values (for mini charts)
+Sparkline Data = 
+VAR MonthlyData = 
+    SUMMARIZE(
+        ALLSELECTED(fact_budget_allocations),
+        dim_date[year_month],
+        "Value", [Total Revenue]
+    )
+RETURN
+CONCATENATEX(
+    MonthlyData,
+    FORMAT([Value], "0"),
+    ","
+)
+
+
+// =====================================================
+// 8. ADVANCED CALCULATIONS
+// =====================================================
+
+// Pareto Analysis (80/20 Rule)
+Pareto Cumulative % = 
+VAR CurrentBrand = SELECTEDVALUE(dim_brands[name])
+VAR BrandRevenue = [Total Revenue]
+VAR TotalRevenue = CALCULATE([Total Revenue], ALL(dim_brands))
+VAR BrandsAbove = 
+    FILTER(
+        ALL(dim_brands[name]),
+        CALCULATE([Total Revenue]) > BrandRevenue
+    )
+VAR CumulativeAbove = 
+    SUMX(
+        BrandsAbove,
+        CALCULATE([Total Revenue])
+    )
+RETURN
+DIVIDE(CumulativeAbove + BrandRevenue, TotalRevenue, 0)
+
+// Moving Average (Configurable)
+Moving Average = 
+VAR WindowSize = 3  // Change this for different periods
+RETURN
+AVERAGEX(
+    DATESINPERIOD(
+        dim_date[full_date],
+        MAX(dim_date[full_date]),
+        -WindowSize,
+        MONTH
+    ),
+    [Total Revenue]
+)
+
+// Standard Deviation
+Revenue StdDev = 
+VAR AvgRevenue = AVERAGEX(ALL(dim_date[year_month]), [Total Revenue])
+RETURN
+SQRT(
+    AVERAGEX(
+        ALL(dim_date[year_month]),
+        POWER([Total Revenue] - AvgRevenue, 2)
+    )
+)
+
+// Coefficient of Variation
+Revenue CV = 
+DIVIDE(
+    [Revenue StdDev],
+    AVERAGEX(ALL(dim_date[year_month]), [Total Revenue]),
+    0
+)
+
+
+// =====================================================
+// END OF DAX MEASURES LIBRARY
+// =====================================================

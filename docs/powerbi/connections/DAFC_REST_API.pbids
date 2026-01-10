@@ -1,0 +1,15 @@
+{
+    "version": "0.1",
+    "connections": [
+        {
+            "details": {
+                "protocol": "web-api",
+                "address": {
+                    "url": "https://dafc-otb-platform.onrender.com/api/export/sku-performance?format=json"
+                }
+            },
+            "options": {},
+            "mode": "Import"
+        }
+    ]
+}

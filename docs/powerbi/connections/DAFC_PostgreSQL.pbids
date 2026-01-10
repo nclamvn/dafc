@@ -1,0 +1,20 @@
+{
+    "version": "0.1",
+    "connections": [
+        {
+            "details": {
+                "protocol": "postgresql",
+                "address": {
+                    "server": "dpg-xxx.oregon-postgres.render.com",
+                    "database": "dafc_otb_production"
+                },
+                "authentication": null,
+                "query": null
+            },
+            "options": {
+                "CommandTimeout": "0"
+            },
+            "mode": "Import"
+        }
+    ]
+}
