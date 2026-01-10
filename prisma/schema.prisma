@@ -607,7 +607,7 @@ model SKUProposal {
 
   // References
   otbPlanId           String
-  otbPlan             OTBPlan            @relation(fields: [otbPlanId], references: [id])
+  otbPlan             OTBPlan            @relation(fields: [otbPlanId], references: [id], onDelete: Cascade)
   seasonId            String
   season              Season             @relation(fields: [seasonId], references: [id])
   brandId             String
@@ -811,7 +811,7 @@ model Notification {
 
   // Recipient
   userId              String
-  user                User                 @relation(fields: [userId], references: [id])
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Content
   type                NotificationType
