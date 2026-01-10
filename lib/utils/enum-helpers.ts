@@ -53,6 +53,7 @@ export const OTB_VERSION_TYPES = [
   'V3_REVIEWED',
   'VA_APPROVED',
   'VF_FINAL',
+  'REVISED',
 ] as const;
 
 export type OTBVersionType = typeof OTB_VERSION_TYPES[number];

@@ -64,6 +64,7 @@ enum OTBVersionType {
   V3_REVIEWED
   VA_APPROVED
   VF_FINAL
+  REVISED        // Added for legacy data compatibility
 }
 
 enum SKUProposalStatus {

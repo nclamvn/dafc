@@ -479,6 +479,7 @@ export const OTB_VERSION_LABELS: Record<OTBVersionType, string> = {
   V3_REVIEWED: 'V3 - Reviewed',
   VA_APPROVED: 'VA - Approved',
   VF_FINAL: 'VF - Final',
+  REVISED: 'Revised',
 };
 
 export const SKU_STATUS_LABELS: Record<SKUProposalStatus, string> = {
