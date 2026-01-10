@@ -29,8 +29,12 @@ import {
 } from '@/components/ui/dialog';
 import { PageHeader } from '@/components/shared/page-header';
 import { BudgetForm } from '@/components/budget/budget-form';
+import { BudgetVarianceCompact } from '@/components/budget/budget-variance';
 import { BudgetFormData } from '@/lib/validations/budget';
 import { Season, Brand, SalesLocation, BUDGET_STATUS_LABELS } from '@/types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { BarChart3, PieChart, TrendingUp } from 'lucide-react';
 
 interface BudgetWithRelations {
   id: string;
@@ -490,6 +494,129 @@ export default function BudgetDetailPage({
                   </div>
                 </>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Budget Analytics */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Budget Analytics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="overview" className="space-y-4">
+                <TabsList>
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="allocation">Allocation</TabsTrigger>
+                  <TabsTrigger value="performance">Performance</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="overview" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Seasonal vs Replenishment */}
+                    <Card>
+                      <CardContent className="pt-4">
+                        <div className="text-sm text-muted-foreground mb-2">Budget Split</div>
+                        <div className="space-y-3">
+                          <div>
+                            <div className="flex justify-between text-sm mb-1">
+                              <span>Seasonal</span>
+                              <span>
+                                {budget.seasonalBudget && budget.totalBudget
+                                  ? ((Number(budget.seasonalBudget) / Number(budget.totalBudget)) * 100).toFixed(1)
+                                  : 0}%
+                              </span>
+                            </div>
+                            <Progress
+                              value={
+                                budget.seasonalBudget && budget.totalBudget
+                                  ? (Number(budget.seasonalBudget) / Number(budget.totalBudget)) * 100
+                                  : 0
+                              }
+                              className="h-2"
+                            />
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-sm mb-1">
+                              <span>Replenishment</span>
+                              <span>
+                                {budget.replenishmentBudget && budget.totalBudget
+                                  ? ((Number(budget.replenishmentBudget) / Number(budget.totalBudget)) * 100).toFixed(1)
+                                  : 0}%
+                              </span>
+                            </div>
+                            <Progress
+                              value={
+                                budget.replenishmentBudget && budget.totalBudget
+                                  ? (Number(budget.replenishmentBudget) / Number(budget.totalBudget)) * 100
+                                  : 0
+                              }
+                              className="h-2 [&>div]:bg-amber-500"
+                            />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Status Progress */}
+                    <Card>
+                      <CardContent className="pt-4">
+                        <div className="text-sm text-muted-foreground mb-2">Approval Progress</div>
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1">
+                            <Progress
+                              value={
+                                budget.status === 'APPROVED' ? 100 :
+                                budget.status === 'UNDER_REVIEW' ? 66 :
+                                budget.status === 'SUBMITTED' ? 33 : 0
+                              }
+                              className="h-3"
+                            />
+                          </div>
+                          <span className="text-sm font-medium">
+                            {budget.status === 'APPROVED' ? '100%' :
+                             budget.status === 'UNDER_REVIEW' ? '66%' :
+                             budget.status === 'SUBMITTED' ? '33%' : '0%'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                          <span>Draft</span>
+                          <span>Submitted</span>
+                          <span>Review</span>
+                          <span>Approved</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Comparison Quick View */}
+                    {comparison && (
+                      <BudgetVarianceCompact
+                        budgeted={Number(comparison.totalBudget)}
+                        actual={Number(budget.totalBudget)}
+                        label={`vs ${comparison.season.code}`}
+                      />
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="allocation">
+                  <div className="text-center py-8 text-muted-foreground">
+                    <PieChart className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p>Category breakdown coming soon</p>
+                    <p className="text-sm">Allocate budget to categories and subcategories</p>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="performance">
+                  <div className="text-center py-8 text-muted-foreground">
+                    <TrendingUp className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p>Performance tracking coming soon</p>
+                    <p className="text-sm">Track actual spend vs budget over time</p>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
 
