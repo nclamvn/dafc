@@ -468,6 +468,7 @@ export const OTB_STATUS_LABELS: Record<OTBPlanStatus, string> = {
   UNDER_REVIEW: 'Under Review',
   APPROVED: 'Approved',
   REJECTED: 'Rejected',
+  REVISED: 'Revised',
   FINAL: 'Final',
 };
 
@@ -489,6 +490,7 @@ export const SKU_STATUS_LABELS: Record<SKUProposalStatus, string> = {
   SUBMITTED: 'Submitted',
   APPROVED: 'Approved',
   REJECTED: 'Rejected',
+  REVISED: 'Revised',
 };
 
 export const WORKFLOW_STATUS_LABELS: Record<WorkflowStatus, string> = {

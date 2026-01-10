@@ -53,6 +53,7 @@ enum OTBPlanStatus {
   UNDER_REVIEW
   APPROVED
   REJECTED
+  REVISED        // Added for legacy data compatibility
   FINAL
 }
 
@@ -74,6 +75,7 @@ enum SKUProposalStatus {
   SUBMITTED
   APPROVED
   REJECTED
+  REVISED        // Added for legacy data compatibility
 }
 
 enum SKUValidationStatus {

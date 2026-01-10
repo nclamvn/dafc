@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { otbPlanCreateSchema } from '@/lib/validations/otb';
 import { mockOTBPlans } from '@/lib/mock-data';
+import { OTB_PLAN_STATUSES, safeOTBStatus } from '@/lib/utils/enum-helpers';
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,7 +24,10 @@ export async function GET(request: NextRequest) {
       const where: Record<string, unknown> = {};
 
       if (budgetId) where.budgetId = budgetId;
-      if (status) where.status = status;
+      // Only filter by status if it's a valid enum value
+      if (status && OTB_PLAN_STATUSES.includes(status as typeof OTB_PLAN_STATUSES[number])) {
+        where.status = status;
+      }
 
       if (seasonId || brandId) {
         where.budget = {};
@@ -57,7 +61,7 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: 'desc' },
       });
 
-      // Calculate summary for each plan
+      // Calculate summary for each plan and sanitize enum values
       plansWithSummary = plans.map((plan) => {
         const totalPlannedUnits = plan.lineItems.reduce(
           (sum, item) => sum + (item.userUnits || 0),
@@ -75,6 +79,8 @@ export async function GET(request: NextRequest) {
 
         return {
           ...plan,
+          // Sanitize status to ensure it's a valid enum value
+          status: safeOTBStatus(plan.status),
           summary: {
             totalPlannedUnits,
             totalPlannedAmount,
