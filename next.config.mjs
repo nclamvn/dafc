@@ -4,23 +4,77 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // =====================================================
+  // PERFORMANCE
+  // =====================================================
+
   // Enable standalone output for Docker
   output: 'standalone',
 
-  // Disable telemetry
-  telemetry: false,
+  // Enable React strict mode for better debugging
+  reactStrictMode: true,
 
-  // Image optimization
+  // Optimize production builds
+  swcMinify: true,
+
+  // Compress responses
+  compress: true,
+
+  // Generate ETags for caching
+  generateEtags: true,
+
+  // Reduce powered-by header exposure
+  poweredByHeader: false,
+
+  // =====================================================
+  // IMAGE OPTIMIZATION
+  // =====================================================
+
   images: {
     domains: ['cdn.dafc.com', 'images.dafc.com'],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
   },
 
-  // Security headers
+  // =====================================================
+  // CACHING & SECURITY HEADERS
+  // =====================================================
+
   async headers() {
     return [
+      // Static assets - long cache
+      {
+        source: '/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Fonts - very long cache
+      {
+        source: '/fonts/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // API routes - no cache by default
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
+      },
+      // Security headers for all routes
       {
         source: '/:path*',
         headers: [
@@ -59,32 +113,74 @@ const nextConfig = {
 
   // Redirects
   async redirects() {
-    return [
-      // Example redirect
-      // {
-      //   source: '/old-path',
-      //   destination: '/new-path',
-      //   permanent: true,
-      // },
-    ];
+    return [];
   },
 
-  // Webpack configuration
-  webpack: (config, { isServer }) => {
+  // =====================================================
+  // WEBPACK OPTIMIZATION
+  // =====================================================
+
+  webpack: (config, { dev, isServer }) => {
     // Ignore punycode deprecation warning
     config.ignoreWarnings = [
       { module: /node_modules\/punycode/ },
     ];
 
+    // Client-side production optimizations only
+    if (!dev && !isServer) {
+      // Extend existing splitChunks config for heavy libraries
+      config.optimization.splitChunks = {
+        ...config.optimization.splitChunks,
+        cacheGroups: {
+          ...config.optimization.splitChunks?.cacheGroups,
+          // Separate chunk for recharts (large library)
+          recharts: {
+            test: /[\\/]node_modules[\\/](recharts|d3-.*)[\\/]/,
+            name: 'recharts',
+            chunks: 'async',
+            priority: 20,
+            reuseExistingChunk: true,
+          },
+          // Separate chunk for date-fns
+          dateFns: {
+            test: /[\\/]node_modules[\\/]date-fns[\\/]/,
+            name: 'date-fns',
+            chunks: 'async',
+            priority: 20,
+            reuseExistingChunk: true,
+          },
+        },
+      };
+    }
+
+    // Ignore specific modules on server
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push({
+        'utf-8-validate': 'commonjs utf-8-validate',
+        'bufferutil': 'commonjs bufferutil',
+      });
+    }
+
     return config;
   },
 
-  // Experimental features
+  // =====================================================
+  // EXPERIMENTAL FEATURES
+  // =====================================================
+
   experimental: {
     // Enable server actions
     serverActions: {
       bodySizeLimit: '2mb',
     },
+    // Optimize package imports
+    optimizePackageImports: [
+      'lucide-react',
+      'date-fns',
+      'recharts',
+      '@radix-ui/react-icons',
+    ],
   },
 
   // Logging

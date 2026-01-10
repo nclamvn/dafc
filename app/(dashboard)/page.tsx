@@ -10,6 +10,8 @@ import {
   QuickActions,
   AIInsightsWidget,
   PendingApprovals,
+  ProactiveAlertsWidget,
+  DemandForecastWidget,
 } from '@/components/dashboard';
 import type { ActivityItem, QuickAction, AIInsight, PendingApproval } from '@/components/dashboard';
 
@@ -330,12 +332,20 @@ export default async function DashboardPage() {
         <OTBTrendsChart data={data.otbTrendsData} />
       </div>
 
-      {/* Three Column Layout */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <ActivityFeed activities={data.activities} maxHeight="350px" />
-        <QuickActions actions={data.quickActions} />
-        <AIInsightsWidget insights={data.aiInsights} />
+      {/* Alerts & Forecast Row */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <ProactiveAlertsWidget />
+        <DemandForecastWidget />
       </div>
+
+      {/* Insights & Activity Row */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <AIInsightsWidget insights={data.aiInsights} />
+        <ActivityFeed activities={data.activities} maxHeight="350px" />
+      </div>
+
+      {/* Quick Actions */}
+      <QuickActions actions={data.quickActions} />
 
       {/* Pending Approvals */}
       <PendingApprovals

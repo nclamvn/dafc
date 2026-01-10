@@ -203,6 +203,9 @@ model User {
   apiKeys                APIKey[]
   realtimeNotifications  RealtimeNotification[]
 
+  // Automation relations
+  automationRulesCreated AutomationRule[] @relation("AutomationRuleCreatedBy")
+
   @@map("users")
 }
 
@@ -2043,4 +2046,42 @@ model RealtimeNotification {
 
   @@index([userId, isRead, createdAt])
   @@map("realtime_notifications")
+}
+
+// ============================================
+// AUTOMATION RULES
+// ============================================
+
+model AutomationRule {
+  id                  String    @id @default(cuid())
+
+  // Basic info
+  name                String
+  description         String?   @db.Text
+  type                String    // AUTO_APPROVE_BUDGET, AUTO_APPROVE_OTB, AUTO_APPROVE_SKU, AUTO_REORDER, AUTO_ESCALATE, AUTO_NOTIFY
+
+  // Rule configuration
+  enabled             Boolean   @default(true)
+  priority            Int       @default(10)
+
+  // Conditions & Actions (stored as JSON)
+  conditions          Json      // Array of RuleCondition
+  conditionLogic      String    @default("AND") // AND | OR
+  actions             Json      // Array of RuleAction
+
+  // Execution limits
+  cooldownMinutes     Int?
+  maxExecutionsPerDay Int?
+  lastExecutedAt      DateTime?
+  executionCount      Int       @default(0)
+
+  // Ownership
+  createdById         String
+  createdBy           User      @relation("AutomationRuleCreatedBy", fields: [createdById], references: [id])
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([type, enabled])
+  @@map("automation_rules")
 }

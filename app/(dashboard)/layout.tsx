@@ -9,6 +9,7 @@ import { AIChatWidget } from '@/components/ai/chat-widget';
 import { CommandMenu } from '@/components/global-search';
 import { BottomNav } from '@/components/mobile/bottom-nav';
 import { MobileSidebar } from '@/components/mobile/mobile-sidebar';
+import { useAlertNotifications } from '@/lib/hooks/use-alert-notifications';
 
 const SIDEBAR_COLLAPSED_KEY = 'sidebar-collapsed';
 
@@ -20,6 +21,13 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Enable real-time alert notifications (check every 2 minutes)
+  useAlertNotifications({
+    enabled: true,
+    pollInterval: 2 * 60 * 1000,
+    showCriticalOnly: false,
+  });
 
   // Load collapsed state from localStorage
   useEffect(() => {
