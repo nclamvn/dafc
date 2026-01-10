@@ -299,12 +299,20 @@ export default function SKUProposalPage() {
         title={t('title')}
         description={t('description')}
       >
-        <Link href="/sku-proposal/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            {t('createProposal')}
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/sku-proposal/import">
+            <Button variant="outline">
+              <Upload className="mr-2 h-4 w-4" />
+              {t('importExcel') || 'Import Excel'}
+            </Button>
+          </Link>
+          <Link href="/sku-proposal/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              {t('createProposal')}
+            </Button>
+          </Link>
+        </div>
       </PageHeader>
 
       {/* Summary Cards */}

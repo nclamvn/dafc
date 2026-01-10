@@ -16,6 +16,8 @@ import {
   CheckCircle,
   Clock,
   XCircle,
+  BarChart3,
+  LayoutList,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -37,6 +39,7 @@ import {
 import { PageHeader } from '@/components/shared/page-header';
 import { DataTable } from '@/components/shared/data-table';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { BudgetCharts } from '@/components/budget';
 import { BudgetAllocation, Season, Brand, BUDGET_STATUS_LABELS } from '@/types';
 
 interface BudgetWithRelations extends Omit<BudgetAllocation, 'season' | 'brand' | 'location' | 'createdBy'> {
@@ -70,6 +73,7 @@ export default function BudgetPage() {
   const [seasonFilter, setSeasonFilter] = useState<string>('all');
   const [brandFilter, setBrandFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'table' | 'charts'>('table');
 
   const fetchData = useCallback(async () => {
     try {
@@ -332,59 +336,100 @@ export default function BudgetPage() {
         </Card>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-4">
-        <Select value={seasonFilter} onValueChange={setSeasonFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder={t('columnSeason')} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{tFilters('allSeasons')}</SelectItem>
-            {seasons.map((season) => (
-              <SelectItem key={season.id} value={season.id}>
-                {season.code}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Filters and View Toggle */}
+      <div className="flex items-center justify-between">
+        <div className="flex gap-4">
+          <Select value={seasonFilter} onValueChange={setSeasonFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder={t('columnSeason')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{tFilters('allSeasons')}</SelectItem>
+              {seasons.map((season) => (
+                <SelectItem key={season.id} value={season.id}>
+                  {season.code}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <Select value={brandFilter} onValueChange={setBrandFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder={t('columnBrand')} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{tFilters('allBrands')}</SelectItem>
-            {brands.map((brand) => (
-              <SelectItem key={brand.id} value={brand.id}>
-                {brand.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <Select value={brandFilter} onValueChange={setBrandFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder={t('columnBrand')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{tFilters('allBrands')}</SelectItem>
+              {brands.map((brand) => (
+                <SelectItem key={brand.id} value={brand.id}>
+                  {brand.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder={t('columnStatus')} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{tFilters('allStatuses')}</SelectItem>
-            <SelectItem value="DRAFT">{tBudget('draft')}</SelectItem>
-            <SelectItem value="SUBMITTED">{tBudget('submitted')}</SelectItem>
-            <SelectItem value="UNDER_REVIEW">{tBudget('underReview')}</SelectItem>
-            <SelectItem value="APPROVED">{tBudget('approved')}</SelectItem>
-            <SelectItem value="REJECTED">{tBudget('rejected')}</SelectItem>
-          </SelectContent>
-        </Select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder={t('columnStatus')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{tFilters('allStatuses')}</SelectItem>
+              <SelectItem value="DRAFT">{tBudget('draft')}</SelectItem>
+              <SelectItem value="SUBMITTED">{tBudget('submitted')}</SelectItem>
+              <SelectItem value="UNDER_REVIEW">{tBudget('underReview')}</SelectItem>
+              <SelectItem value="APPROVED">{tBudget('approved')}</SelectItem>
+              <SelectItem value="REJECTED">{tBudget('rejected')}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* View Toggle */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+            size="sm"
+            onClick={() => setViewMode('table')}
+          >
+            <LayoutList className="h-4 w-4 mr-2" />
+            Table
+          </Button>
+          <Button
+            variant={viewMode === 'charts' ? 'secondary' : 'ghost'}
+            size="sm"
+            onClick={() => setViewMode('charts')}
+          >
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Charts
+          </Button>
+        </div>
       </div>
 
-      {/* Data Table */}
-      <DataTable
-        columns={columns}
-        data={budgets}
-        searchKey="brand"
-        searchPlaceholder={t('searchPlaceholder')}
-        isLoading={isLoading}
-      />
+      {/* Budget Charts View */}
+      {viewMode === 'charts' && (
+        <BudgetCharts
+          budgets={budgets.map((b) => ({
+            id: b.id,
+            brandName: b.brand.name,
+            seasonName: b.season.name,
+            locationName: b.location.name,
+            totalBudget: Number(b.totalBudget),
+            seasonalBudget: Number(b.seasonalBudget),
+            replenishmentBudget: Number(b.replenishmentBudget),
+            status: b.status,
+          }))}
+          summary={summary}
+        />
+      )}
+
+      {/* Data Table View */}
+      {viewMode === 'table' && (
+        <DataTable
+          columns={columns}
+          data={budgets}
+          searchKey="brand"
+          searchPlaceholder={t('searchPlaceholder')}
+          isLoading={isLoading}
+        />
+      )}
 
       {/* Delete Confirmation */}
       <ConfirmDialog
