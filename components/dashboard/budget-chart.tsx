@@ -12,6 +12,7 @@ import {
   Legend,
 } from 'recharts';
 import { useTranslations } from 'next-intl';
+import { ChartWrapper } from '@/components/ui/chart-wrapper';
 
 interface BudgetChartProps {
   data: {
@@ -40,8 +41,8 @@ export function BudgetChart({ data }: BudgetChartProps) {
         <CardDescription>{t('allocatedVsUtilized')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%" minWidth={200} minHeight={200}>
+        <ChartWrapper height={300}>
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
@@ -79,7 +80,7 @@ export function BudgetChart({ data }: BudgetChartProps) {
               />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartWrapper>
       </CardContent>
     </Card>
   );

@@ -187,14 +187,37 @@ async function main() {
 
   const ss25 = seasons.find(s => s.code === 'SS25')!;
 
-  // 6. Create Demo Users
+  // 6. Create Demo Users (IDs must match auth.ts demo users)
   console.log('Creating users...');
   const hashedPassword = await bcrypt.hash('Demo@123', 12);
+  const demoPassword = await bcrypt.hash('admin123', 12); // For demo logins
 
+  // Create demo users with specific IDs matching auth.ts
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@dafc.com' },
-    update: {},
-    create: { email: 'admin@dafc.com', name: 'Admin User', password: hashedPassword, role: UserRole.ADMIN, status: UserStatus.ACTIVE },
+    update: { id: 'demo-admin' }, // Ensure ID matches auth
+    create: { id: 'demo-admin', email: 'admin@dafc.com', name: 'Admin User', password: demoPassword, role: UserRole.ADMIN, status: UserStatus.ACTIVE },
+  });
+
+  // Create planner user (matches auth.ts demo user)
+  await prisma.user.upsert({
+    where: { email: 'planner@dafc.com' },
+    update: { id: 'demo-planner' },
+    create: { id: 'demo-planner', email: 'planner@dafc.com', name: 'OTB Planner', password: demoPassword, role: UserRole.BRAND_PLANNER, status: UserStatus.ACTIVE },
+  });
+
+  // Create manager user (matches auth.ts demo user)
+  await prisma.user.upsert({
+    where: { email: 'manager@dafc.com' },
+    update: { id: 'demo-manager' },
+    create: { id: 'demo-manager', email: 'manager@dafc.com', name: 'Brand Manager', password: demoPassword, role: UserRole.BRAND_MANAGER, status: UserStatus.ACTIVE },
+  });
+
+  // Create buyer user (matches auth.ts demo user)
+  await prisma.user.upsert({
+    where: { email: 'buyer@dafc.com' },
+    update: { id: 'demo-buyer' },
+    create: { id: 'demo-buyer', email: 'buyer@dafc.com', name: 'Buyer User', password: demoPassword, role: UserRole.BRAND_PLANNER, status: UserStatus.ACTIVE },
   });
 
   await Promise.all([

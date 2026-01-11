@@ -12,6 +12,7 @@ import {
   Legend,
 } from 'recharts';
 import { useTranslations } from 'next-intl';
+import { ChartWrapper } from '@/components/ui/chart-wrapper';
 
 interface OTBTrendsChartProps {
   data: {
@@ -41,8 +42,8 @@ export function OTBTrendsChart({ data }: OTBTrendsChartProps) {
         <CardDescription>{t('plannedVsActual')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%" minWidth={200} minHeight={200}>
+        <ChartWrapper height={300}>
+          <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
@@ -96,7 +97,7 @@ export function OTBTrendsChart({ data }: OTBTrendsChartProps) {
               />
             </LineChart>
           </ResponsiveContainer>
-        </div>
+        </ChartWrapper>
       </CardContent>
     </Card>
   );
