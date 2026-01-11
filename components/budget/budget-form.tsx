@@ -202,15 +202,25 @@ export function BudgetForm({
                           $
                         </span>
                         <Input
-                          type="number"
-                          step="0.01"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="0.00"
                           className="pl-7"
                           disabled={isLoading}
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(parseFloat(e.target.value) || 0)
-                          }
+                          value={field.value || ''}
+                          onChange={(e) => {
+                            // Remove leading zeros and non-numeric chars except decimal
+                            const cleaned = e.target.value.replace(/[^\d.]/g, '');
+                            const normalized = cleaned.replace(/^0+(\d)/, '$1');
+                            const parsed = parseFloat(normalized) || 0;
+                            field.onChange(parsed);
+                          }}
+                          onBlur={() => {
+                            // Format on blur
+                            if (field.value) {
+                              field.onChange(parseFloat(String(field.value)) || 0);
+                            }
+                          }}
                         />
                       </div>
                     </FormControl>

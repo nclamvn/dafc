@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { mockBudgets } from '@/lib/mock-data';
+import { Prisma } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -77,12 +78,24 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // 1. Authentication
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
+    // 2. Parse request body
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      return NextResponse.json(
+        { success: false, error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
+    }
+
     const {
       seasonId,
       brandId,
@@ -95,7 +108,72 @@ export async function POST(request: NextRequest) {
       assumptions,
     } = body;
 
-    // Check if budget already exists for this combination
+    // 3. Validate required fields
+    if (!seasonId || typeof seasonId !== 'string') {
+      return NextResponse.json(
+        { success: false, error: 'Season is required' },
+        { status: 400 }
+      );
+    }
+    if (!brandId || typeof brandId !== 'string') {
+      return NextResponse.json(
+        { success: false, error: 'Brand is required' },
+        { status: 400 }
+      );
+    }
+    if (!locationId || typeof locationId !== 'string') {
+      return NextResponse.json(
+        { success: false, error: 'Location is required' },
+        { status: 400 }
+      );
+    }
+    if (totalBudget === undefined || totalBudget === null || totalBudget <= 0) {
+      return NextResponse.json(
+        { success: false, error: 'Total budget must be greater than 0' },
+        { status: 400 }
+      );
+    }
+
+    // 4. Verify user exists in database
+    const userExists = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { id: true },
+    });
+
+    if (!userExists) {
+      return NextResponse.json(
+        { success: false, error: 'User not found in database. Please re-login.' },
+        { status: 400 }
+      );
+    }
+
+    // 5. Verify season, brand, location exist
+    const [seasonExists, brandExists, locationExists] = await Promise.all([
+      prisma.season.findUnique({ where: { id: seasonId }, select: { id: true } }),
+      prisma.brand.findUnique({ where: { id: brandId }, select: { id: true } }),
+      prisma.salesLocation.findUnique({ where: { id: locationId }, select: { id: true } }),
+    ]);
+
+    if (!seasonExists) {
+      return NextResponse.json(
+        { success: false, error: 'Selected season does not exist' },
+        { status: 400 }
+      );
+    }
+    if (!brandExists) {
+      return NextResponse.json(
+        { success: false, error: 'Selected brand does not exist' },
+        { status: 400 }
+      );
+    }
+    if (!locationExists) {
+      return NextResponse.json(
+        { success: false, error: 'Selected location does not exist' },
+        { status: 400 }
+      );
+    }
+
+    // 6. Check if budget already exists for this combination
     const existing = await prisma.budgetAllocation.findFirst({
       where: {
         seasonId,
@@ -107,33 +185,59 @@ export async function POST(request: NextRequest) {
 
     if (existing) {
       return NextResponse.json(
-        { success: false, error: 'Budget already exists for this season/brand/location' },
+        { success: false, error: 'Budget already exists for this season/brand/location combination' },
         { status: 400 }
       );
     }
 
-    const budget = await prisma.budgetAllocation.create({
-      data: {
-        seasonId,
-        brandId,
-        locationId,
-        totalBudget,
-        seasonalBudget,
-        replenishmentBudget,
-        currency: currency || 'USD',
-        comments,
-        assumptions,
-        status: 'DRAFT',
-        version: 1,
-        createdById: session.user.id,
-      },
-      include: {
-        season: true,
-        brand: true,
-        location: true,
-        createdBy: { select: { id: true, name: true, email: true } },
-      },
-    });
+    // 7. Create budget
+    let budget;
+    try {
+      budget = await prisma.budgetAllocation.create({
+        data: {
+          seasonId,
+          brandId,
+          locationId,
+          totalBudget: new Prisma.Decimal(totalBudget),
+          seasonalBudget: seasonalBudget ? new Prisma.Decimal(seasonalBudget) : null,
+          replenishmentBudget: replenishmentBudget ? new Prisma.Decimal(replenishmentBudget) : null,
+          currency: currency || 'USD',
+          comments: comments || null,
+          assumptions: assumptions || null,
+          status: 'DRAFT',
+          version: 1,
+          createdById: session.user.id,
+        },
+        include: {
+          season: true,
+          brand: true,
+          location: true,
+          createdBy: { select: { id: true, name: true, email: true } },
+        },
+      });
+    } catch (createError) {
+      if (createError instanceof Prisma.PrismaClientKnownRequestError) {
+        console.error('Prisma error creating budget:', {
+          code: createError.code,
+          meta: createError.meta,
+          message: createError.message,
+        });
+
+        if (createError.code === 'P2002') {
+          return NextResponse.json(
+            { success: false, error: 'Budget with this combination already exists' },
+            { status: 409 }
+          );
+        }
+        if (createError.code === 'P2003') {
+          return NextResponse.json(
+            { success: false, error: 'Invalid reference: season, brand, or location not found' },
+            { status: 400 }
+          );
+        }
+      }
+      throw createError;
+    }
 
     return NextResponse.json({
       success: true,
@@ -141,8 +245,16 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error creating budget:', error);
+
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const isDev = process.env.NODE_ENV === 'development';
+
     return NextResponse.json(
-      { success: false, error: 'Failed to create budget' },
+      {
+        success: false,
+        error: 'Failed to create budget',
+        ...(isDev && { details: errorMessage }),
+      },
       { status: 500 }
     );
   }
