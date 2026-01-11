@@ -47,6 +47,7 @@ import {
   Legend,
   Cell,
 } from 'recharts';
+import { ChartWrapper } from '@/components/ui/chart-wrapper';
 import { cn } from '@/lib/utils';
 
 interface RiskFactor {
@@ -469,7 +470,7 @@ export default function DecisionCopilotPage() {
                 <CardDescription>Multi-dimensional analysis across scenarios</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[350px]">
+                <ChartWrapper height={350}>
                   <ResponsiveContainer width="100%" height="100%">
                     <RadarChart data={scenarioData}>
                       <PolarGrid />
@@ -499,7 +500,7 @@ export default function DecisionCopilotPage() {
                       <Legend />
                     </RadarChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartWrapper>
               </CardContent>
             </Card>
           </div>
@@ -538,7 +539,7 @@ export default function DecisionCopilotPage() {
                 <CardDescription>Current vs previous period comparison</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[300px]">
+                <ChartWrapper height={300}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={riskTrendData} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" />
@@ -557,7 +558,7 @@ export default function DecisionCopilotPage() {
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartWrapper>
               </CardContent>
             </Card>
           </div>

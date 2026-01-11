@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ChartWrapper } from '@/components/ui/chart-wrapper';
 import {
   ComposedChart,
   Line,
@@ -79,7 +80,7 @@ export function ForecastChart({
       )}
 
       {/* Chart */}
-      <div className="h-[300px]">
+      <ChartWrapper height={300}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <defs>
@@ -176,7 +177,7 @@ export function ForecastChart({
             />
           </ComposedChart>
         </ResponsiveContainer>
-      </div>
+      </ChartWrapper>
     </div>
   );
 

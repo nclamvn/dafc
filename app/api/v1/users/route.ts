@@ -2,9 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { createUserSchema } from '@/lib/validations/user';
 import bcrypt from 'bcryptjs';
+import { auth } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
+    // Authentication check
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // Admin-only access for user listing
+    if (session.user.role !== 'ADMIN') {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden: Admin access required' },
+        { status: 403 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search') || '';
     const role = searchParams.get('role') || '';
@@ -47,6 +65,23 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Authentication check
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // Admin-only access for user creation
+    if (session.user.role !== 'ADMIN') {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden: Admin access required' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const validatedData = createUserSchema.parse(body);
 

@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { StatsCard } from '@/components/dashboard/stats-card';
+import { ChartWrapper } from '@/components/ui/chart-wrapper';
 import {
   LineChart,
   Line,
@@ -294,7 +295,7 @@ export default function DemandAnalyticsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[400px]">
+              <ChartWrapper height={400}>
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={demandTrends}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -344,7 +345,7 @@ export default function DemandAnalyticsPage() {
                     />
                   </ComposedChart>
                 </ResponsiveContainer>
-              </div>
+              </ChartWrapper>
             </CardContent>
           </Card>
         </TabsContent>
@@ -358,7 +359,7 @@ export default function DemandAnalyticsPage() {
                 <CardDescription>Current vs Predicted demand comparison</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[350px]">
+                <ChartWrapper height={350}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={categoryDemand} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -370,7 +371,7 @@ export default function DemandAnalyticsPage() {
                       <Bar dataKey="predicted" fill="hsl(var(--chart-2))" name="Predicted" />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
+                </ChartWrapper>
               </CardContent>
             </Card>
 
@@ -431,7 +432,7 @@ export default function DemandAnalyticsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[400px]">
+              <ChartWrapper height={400}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={seasonalPatterns}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -463,7 +464,7 @@ export default function DemandAnalyticsPage() {
                     />
                   </LineChart>
                 </ResponsiveContainer>
-              </div>
+              </ChartWrapper>
 
               {/* Seasonal Insights */}
               <div className="grid gap-4 md:grid-cols-3 mt-6">

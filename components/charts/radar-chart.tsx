@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChartWrapper } from '@/components/ui/chart-wrapper';
 import {
   Radar,
   RadarChart as RechartsRadarChart,
@@ -42,7 +43,7 @@ export function RadarChart({
   maxValue,
 }: RadarChartProps) {
   const content = (
-    <div className="h-[350px]">
+    <ChartWrapper height={350}>
       <ResponsiveContainer width="100%" height="100%">
         <RechartsRadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
           <PolarGrid className="stroke-muted" />
@@ -78,7 +79,7 @@ export function RadarChart({
           {showLegend && <Legend />}
         </RechartsRadarChart>
       </ResponsiveContainer>
-    </div>
+    </ChartWrapper>
   );
 
   if (title) {

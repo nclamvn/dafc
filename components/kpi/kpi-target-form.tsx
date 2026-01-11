@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
+import { NumberInput } from '@/components/ui/number-input';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Target, Info } from 'lucide-react';
@@ -117,12 +117,12 @@ export function KPITargetForm({
                 <FormItem>
                   <FormLabel>Target Value</FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
+                    <NumberInput
+                      value={field.value}
+                      onChange={(val) => field.onChange(val || 0)}
+                      allowDecimals={true}
+                      decimalPlaces={2}
                       placeholder="Enter target value"
-                      {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value))}
                     />
                   </FormControl>
                   <FormDescription>

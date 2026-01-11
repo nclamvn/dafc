@@ -14,6 +14,7 @@ import {
   Line,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ChartWrapper } from '@/components/ui/chart-wrapper';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -298,7 +299,7 @@ export function BudgetVariance({
           <CardDescription>Cumulative spend over time</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px]">
+          <ChartWrapper height={300}>
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -322,7 +323,7 @@ export function BudgetVariance({
                 />
               </ComposedChart>
             </ResponsiveContainer>
-          </div>
+          </ChartWrapper>
         </CardContent>
       </Card>
 

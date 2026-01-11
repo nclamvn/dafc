@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/select';
 import { RadarChart } from '@/components/charts/radar-chart';
 import { Heatmap } from '@/components/charts/heatmap';
+import { ChartWrapper } from '@/components/ui/chart-wrapper';
 import {
   BarChart,
   Bar,
@@ -255,7 +256,7 @@ export default function ComparisonPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-[350px]">
+            <ChartWrapper height={350}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={seasonComparisonData.slice(0, 4)}
@@ -277,7 +278,7 @@ export default function ComparisonPage() {
                   <Bar dataKey="FW24" fill="#94a3b8" name={secondarySelection} radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </ChartWrapper>
           </CardContent>
         </Card>
 
@@ -387,7 +388,7 @@ export default function ComparisonPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px]">
+            <ChartWrapper height={300}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={categoryComparisonData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -406,7 +407,7 @@ export default function ComparisonPage() {
                   <Bar dataKey="FW24" fill="#94a3b8" name="FW24" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </ChartWrapper>
           </CardContent>
         </Card>
 

@@ -15,6 +15,7 @@ import {
   Legend,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ChartWrapper } from '@/components/ui/chart-wrapper';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
@@ -191,7 +192,7 @@ export function BudgetCharts({ budgets, summary, className }: BudgetChartsProps)
           <CardDescription>Distribution across brands</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-[200px]">
+          <ChartWrapper height={200}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -210,7 +211,7 @@ export function BudgetCharts({ budgets, summary, className }: BudgetChartsProps)
                 <Tooltip content={<CustomPieTooltip />} />
               </PieChart>
             </ResponsiveContainer>
-          </div>
+          </ChartWrapper>
           <div className="flex flex-wrap justify-center gap-2 mt-2">
             {brandDistribution.slice(0, 4).map((entry, index) => (
               <div key={entry.name} className="flex items-center gap-1 text-xs">
@@ -232,7 +233,7 @@ export function BudgetCharts({ budgets, summary, className }: BudgetChartsProps)
           <CardDescription>Approval status breakdown</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-[200px]">
+          <ChartWrapper height={200}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -263,7 +264,7 @@ export function BudgetCharts({ budgets, summary, className }: BudgetChartsProps)
                 <Tooltip content={<CustomPieTooltip />} />
               </PieChart>
             </ResponsiveContainer>
-          </div>
+          </ChartWrapper>
           <div className="flex flex-wrap justify-center gap-2 mt-2">
             {statusDistribution.map((entry, index) => {
               const statusColors: Record<string, string> = {
@@ -294,7 +295,7 @@ export function BudgetCharts({ budgets, summary, className }: BudgetChartsProps)
           <CardDescription>Budget allocation by type for top brands</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px]">
+          <ChartWrapper height={300}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={budgetTypeData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -329,7 +330,7 @@ export function BudgetCharts({ budgets, summary, className }: BudgetChartsProps)
                 />
               </BarChart>
             </ResponsiveContainer>
-          </div>
+          </ChartWrapper>
         </CardContent>
       </Card>
     </div>

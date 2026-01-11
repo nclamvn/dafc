@@ -18,6 +18,7 @@ import {
   Area,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChartWrapper } from '@/components/ui/chart-wrapper';
 
 // Default colors for charts
 const COLORS = [
@@ -63,31 +64,33 @@ export function PieChartComponent({
         </CardHeader>
       )}
       <CardContent>
-        <ResponsiveContainer width="100%" height={height}>
-          <RechartsPieChart>
-            <Pie
-              data={data as Array<{ name: string; value: number; [key: string]: unknown }>}
-              cx="50%"
-              cy="50%"
-              innerRadius={innerRadius}
-              outerRadius={outerRadius}
-              paddingAngle={2}
-              dataKey="value"
-              label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
-            >
-              {data.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={entry.color || COLORS[index % COLORS.length]}
-                />
-              ))}
-            </Pie>
-            <Tooltip
-              formatter={(value) => [`$${typeof value === 'number' ? value.toLocaleString() : value}`, 'Value']}
-            />
-            {showLegend && <Legend />}
-          </RechartsPieChart>
-        </ResponsiveContainer>
+        <ChartWrapper height={height}>
+          <ResponsiveContainer width="100%" height="100%">
+            <RechartsPieChart>
+              <Pie
+                data={data as Array<{ name: string; value: number; [key: string]: unknown }>}
+                cx="50%"
+                cy="50%"
+                innerRadius={innerRadius}
+                outerRadius={outerRadius}
+                paddingAngle={2}
+                dataKey="value"
+                label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+              >
+                {data.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.color || COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+              <Tooltip
+                formatter={(value) => [`$${typeof value === 'number' ? value.toLocaleString() : value}`, 'Value']}
+              />
+              {showLegend && <Legend />}
+            </RechartsPieChart>
+          </ResponsiveContainer>
+        </ChartWrapper>
       </CardContent>
     </Card>
   );
@@ -128,31 +131,33 @@ export function BarChartComponent({
         </CardHeader>
       )}
       <CardContent>
-        <ResponsiveContainer width="100%" height={height}>
-          <RechartsBarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis dataKey="name" className="text-xs" />
-            <YAxis className="text-xs" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px',
-              }}
-            />
-            {showLegend && <Legend />}
-            {bars.map((bar, index) => (
-              <Bar
-                key={bar.dataKey}
-                dataKey={bar.dataKey}
-                name={bar.name}
-                fill={bar.color || COLORS[index % COLORS.length]}
-                stackId={stacked ? 'stack' : undefined}
-                radius={[4, 4, 0, 0]}
+        <ChartWrapper height={height}>
+          <ResponsiveContainer width="100%" height="100%">
+            <RechartsBarChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis dataKey="name" className="text-xs" />
+              <YAxis className="text-xs" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px',
+                }}
               />
-            ))}
-          </RechartsBarChart>
-        </ResponsiveContainer>
+              {showLegend && <Legend />}
+              {bars.map((bar, index) => (
+                <Bar
+                  key={bar.dataKey}
+                  dataKey={bar.dataKey}
+                  name={bar.name}
+                  fill={bar.color || COLORS[index % COLORS.length]}
+                  stackId={stacked ? 'stack' : undefined}
+                  radius={[4, 4, 0, 0]}
+                />
+              ))}
+            </RechartsBarChart>
+          </ResponsiveContainer>
+        </ChartWrapper>
       </CardContent>
     </Card>
   );
@@ -194,32 +199,34 @@ export function LineChartComponent({
           </CardHeader>
         )}
         <CardContent>
-          <ResponsiveContainer width="100%" height={height}>
-            <AreaChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis dataKey="name" className="text-xs" />
-              <YAxis className="text-xs" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                }}
-              />
-              {showLegend && <Legend />}
-              {lines.map((line, index) => (
-                <Area
-                  key={line.dataKey}
-                  type="monotone"
-                  dataKey={line.dataKey}
-                  name={line.name}
-                  stroke={line.color || COLORS[index % COLORS.length]}
-                  fill={line.color || COLORS[index % COLORS.length]}
-                  fillOpacity={0.2}
+          <ChartWrapper height={height}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={data}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis dataKey="name" className="text-xs" />
+                <YAxis className="text-xs" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                  }}
                 />
-              ))}
-            </AreaChart>
-          </ResponsiveContainer>
+                {showLegend && <Legend />}
+                {lines.map((line, index) => (
+                  <Area
+                    key={line.dataKey}
+                    type="monotone"
+                    dataKey={line.dataKey}
+                    name={line.name}
+                    stroke={line.color || COLORS[index % COLORS.length]}
+                    fill={line.color || COLORS[index % COLORS.length]}
+                    fillOpacity={0.2}
+                  />
+                ))}
+              </AreaChart>
+            </ResponsiveContainer>
+          </ChartWrapper>
         </CardContent>
       </Card>
     );
@@ -233,32 +240,34 @@ export function LineChartComponent({
         </CardHeader>
       )}
       <CardContent>
-        <ResponsiveContainer width="100%" height={height}>
-          <RechartsLineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis dataKey="name" className="text-xs" />
-            <YAxis className="text-xs" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px',
-              }}
-            />
-            {showLegend && <Legend />}
-            {lines.map((line, index) => (
-              <Line
-                key={line.dataKey}
-                type="monotone"
-                dataKey={line.dataKey}
-                name={line.name}
-                stroke={line.color || COLORS[index % COLORS.length]}
-                strokeWidth={2}
-                dot={{ r: 4 }}
+        <ChartWrapper height={height}>
+          <ResponsiveContainer width="100%" height="100%">
+            <RechartsLineChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis dataKey="name" className="text-xs" />
+              <YAxis className="text-xs" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px',
+                }}
               />
-            ))}
-          </RechartsLineChart>
-        </ResponsiveContainer>
+              {showLegend && <Legend />}
+              {lines.map((line, index) => (
+                <Line
+                  key={line.dataKey}
+                  type="monotone"
+                  dataKey={line.dataKey}
+                  name={line.name}
+                  stroke={line.color || COLORS[index % COLORS.length]}
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                />
+              ))}
+            </RechartsLineChart>
+          </ResponsiveContainer>
+        </ChartWrapper>
       </CardContent>
     </Card>
   );
@@ -290,40 +299,42 @@ export function SizeCurveChart({
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={height}>
-          <RechartsBarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis dataKey="size" className="text-xs" />
-            <YAxis
-              className="text-xs"
-              tickFormatter={(value) => `${value}%`}
-              domain={[0, 'auto']}
-            />
-            <Tooltip
-              formatter={(value, name) => {
-                const v = typeof value === 'number' ? value : 0;
-                return [
-                  name === 'percentage' ? `${v}%` : v.toLocaleString(),
-                  name === 'percentage' ? 'Distribution' : 'Quantity',
-                ];
-              }}
-            />
-            <Bar
-              dataKey="percentage"
-              name="Distribution %"
-              fill="#3b82f6"
-              radius={[4, 4, 0, 0]}
-            />
-            {showQuantity && (
+        <ChartWrapper height={height}>
+          <ResponsiveContainer width="100%" height="100%">
+            <RechartsBarChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis dataKey="size" className="text-xs" />
+              <YAxis
+                className="text-xs"
+                tickFormatter={(value) => `${value}%`}
+                domain={[0, 'auto']}
+              />
+              <Tooltip
+                formatter={(value, name) => {
+                  const v = typeof value === 'number' ? value : 0;
+                  return [
+                    name === 'percentage' ? `${v}%` : v.toLocaleString(),
+                    name === 'percentage' ? 'Distribution' : 'Quantity',
+                  ];
+                }}
+              />
               <Bar
-                dataKey="quantity"
-                name="Quantity"
-                fill="#10b981"
+                dataKey="percentage"
+                name="Distribution %"
+                fill="#3b82f6"
                 radius={[4, 4, 0, 0]}
               />
-            )}
-          </RechartsBarChart>
-        </ResponsiveContainer>
+              {showQuantity && (
+                <Bar
+                  dataKey="quantity"
+                  name="Quantity"
+                  fill="#10b981"
+                  radius={[4, 4, 0, 0]}
+                />
+              )}
+            </RechartsBarChart>
+          </ResponsiveContainer>
+        </ChartWrapper>
       </CardContent>
     </Card>
   );
@@ -361,30 +372,32 @@ export function BudgetComparisonChart({
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={height}>
-          <RechartsBarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis dataKey="name" className="text-xs" />
-            <YAxis
-              className="text-xs"
-              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
-            />
-            <Tooltip
-              formatter={(value) => [`$${typeof value === 'number' ? value.toLocaleString() : value}`, '']}
-            />
-            <Legend />
-            <Bar
-              dataKey="Budget"
-              fill="#3b82f6"
-              radius={[4, 4, 0, 0]}
-            />
-            <Bar
-              dataKey="Actual"
-              fill="#10b981"
-              radius={[4, 4, 0, 0]}
-            />
-          </RechartsBarChart>
-        </ResponsiveContainer>
+        <ChartWrapper height={height}>
+          <ResponsiveContainer width="100%" height="100%">
+            <RechartsBarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis dataKey="name" className="text-xs" />
+              <YAxis
+                className="text-xs"
+                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
+              />
+              <Tooltip
+                formatter={(value) => [`$${typeof value === 'number' ? value.toLocaleString() : value}`, '']}
+              />
+              <Legend />
+              <Bar
+                dataKey="Budget"
+                fill="#3b82f6"
+                radius={[4, 4, 0, 0]}
+              />
+              <Bar
+                dataKey="Actual"
+                fill="#10b981"
+                radius={[4, 4, 0, 0]}
+              />
+            </RechartsBarChart>
+          </ResponsiveContainer>
+        </ChartWrapper>
       </CardContent>
     </Card>
   );
@@ -422,44 +435,46 @@ export function OTBTrendChart({
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={height}>
-          <AreaChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis dataKey="name" className="text-xs" />
-            <YAxis
-              className="text-xs"
-              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
-            />
-            <Tooltip
-              formatter={(value) => [`$${typeof value === 'number' ? value.toLocaleString() : value}`, '']}
-            />
-            <Legend />
-            <Area
-              type="monotone"
-              dataKey="Planned"
-              stackId="1"
-              stroke="#3b82f6"
-              fill="#3b82f6"
-              fillOpacity={0.6}
-            />
-            <Area
-              type="monotone"
-              dataKey="Committed"
-              stackId="1"
-              stroke="#10b981"
-              fill="#10b981"
-              fillOpacity={0.6}
-            />
-            <Area
-              type="monotone"
-              dataKey="Open to Buy"
-              stackId="1"
-              stroke="#f59e0b"
-              fill="#f59e0b"
-              fillOpacity={0.6}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+        <ChartWrapper height={height}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis dataKey="name" className="text-xs" />
+              <YAxis
+                className="text-xs"
+                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
+              />
+              <Tooltip
+                formatter={(value) => [`$${typeof value === 'number' ? value.toLocaleString() : value}`, '']}
+              />
+              <Legend />
+              <Area
+                type="monotone"
+                dataKey="Planned"
+                stackId="1"
+                stroke="#3b82f6"
+                fill="#3b82f6"
+                fillOpacity={0.6}
+              />
+              <Area
+                type="monotone"
+                dataKey="Committed"
+                stackId="1"
+                stroke="#10b981"
+                fill="#10b981"
+                fillOpacity={0.6}
+              />
+              <Area
+                type="monotone"
+                dataKey="Open to Buy"
+                stackId="1"
+                stroke="#f59e0b"
+                fill="#f59e0b"
+                fillOpacity={0.6}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </ChartWrapper>
       </CardContent>
     </Card>
   );

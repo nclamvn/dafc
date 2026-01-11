@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChartWrapper } from '@/components/ui/chart-wrapper';
 import {
   BarChart,
   Bar,
@@ -69,7 +70,7 @@ export function WaterfallChart({
   }, [data]);
 
   const content = (
-    <div className="h-[300px]">
+    <ChartWrapper height={300}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -115,7 +116,7 @@ export function WaterfallChart({
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-    </div>
+    </ChartWrapper>
   );
 
   if (title) {

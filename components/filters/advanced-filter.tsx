@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NumberInput } from '@/components/ui/number-input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -505,10 +506,9 @@ function FilterValueInput({ field, value, onChange }: FilterValueInputProps) {
 
   if (field.type === 'number') {
     return (
-      <Input
-        type="number"
-        value={value as string}
-        onChange={(e) => onChange(e.target.value)}
+      <NumberInput
+        value={value !== undefined && value !== '' ? parseFloat(value as string) : undefined}
+        onChange={(val) => onChange(val !== undefined ? String(val) : '')}
         placeholder={field.placeholder || 'Enter value...'}
       />
     );

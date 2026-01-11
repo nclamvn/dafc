@@ -9,9 +9,10 @@ import {
   Tooltip,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ChartWrapper } from '@/components/ui/chart-wrapper';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PercentInput, CurrencyInput } from '@/components/ui/number-input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -342,10 +343,9 @@ export function BudgetBreakdown({
                       {readOnly ? (
                         `${item.allocatedPercent.toFixed(1)}%`
                       ) : (
-                        <Input
-                          type="number"
-                          value={item.allocatedPercent.toFixed(1)}
-                          onChange={(e) => updateAllocation(item.categoryId, parseFloat(e.target.value) || 0, 'percent')}
+                        <PercentInput
+                          value={item.allocatedPercent}
+                          onChange={(val) => updateAllocation(item.categoryId, val || 0, 'percent')}
                           className="w-20 text-right"
                           disabled={inputMode !== 'percent'}
                         />
@@ -355,10 +355,9 @@ export function BudgetBreakdown({
                       {readOnly ? (
                         formatCurrency(item.allocatedAmount)
                       ) : (
-                        <Input
-                          type="number"
-                          value={Math.round(item.allocatedAmount)}
-                          onChange={(e) => updateAllocation(item.categoryId, parseFloat(e.target.value) || 0, 'amount')}
+                        <CurrencyInput
+                          value={item.allocatedAmount}
+                          onChange={(val) => updateAllocation(item.categoryId, val || 0, 'amount')}
                           className="w-28 text-right"
                           disabled={inputMode !== 'amount'}
                         />
@@ -410,7 +409,7 @@ export function BudgetBreakdown({
           </>
         ) : (
           /* Chart View */
-          <div className="h-[300px]">
+          <ChartWrapper height={300}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -431,7 +430,7 @@ export function BudgetBreakdown({
                 <Tooltip content={<CustomTooltip />} />
               </PieChart>
             </ResponsiveContainer>
-          </div>
+          </ChartWrapper>
         )}
 
         {/* Save Button */}
