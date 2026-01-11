@@ -51,7 +51,6 @@
     "less": "Thu gọn",
     "reset": "Đặt lại"
   },
-
   "navigation": {
     "dashboard": "Bảng điều khiển",
     "budget": "Ngân sách",
@@ -77,7 +76,6 @@
     "toggleTheme": "Đổi giao diện",
     "aiFeatures": "Tính năng AI"
   },
-
   "auth": {
     "login": "Đăng nhập",
     "logout": "Đăng xuất",
@@ -98,7 +96,6 @@
     "signInDescription": "Nhập thông tin đăng nhập của bạn",
     "welcomeBack": "Chào mừng trở lại"
   },
-
   "dashboard": {
     "title": "Bảng điều khiển",
     "welcome": "Xin chào, {name}!",
@@ -157,7 +154,6 @@
     "allCaughtUp": "Bạn đã xử lý hết!",
     "priority": "ưu tiên"
   },
-
   "budget": {
     "title": "Quản lý ngân sách",
     "createBudget": "Tạo ngân sách mới",
@@ -186,7 +182,6 @@
     "totalUsed": "Tổng đã dùng",
     "allocation": "Phân bổ"
   },
-
   "otb": {
     "title": "Kế hoạch Open-to-Buy",
     "createPlan": "Tạo kế hoạch OTB",
@@ -211,7 +206,6 @@
     "analysis": "Phân tích OTB",
     "newPlan": "Kế hoạch mới"
   },
-
   "sku": {
     "title": "Đề xuất SKU",
     "createProposal": "Tạo đề xuất",
@@ -238,7 +232,6 @@
     "proposal": "Đề xuất",
     "newProposal": "Đề xuất mới"
   },
-
   "approval": {
     "title": "Quản lý phê duyệt",
     "pendingApprovals": "Đang chờ phê duyệt",
@@ -258,7 +251,6 @@
     "escalate": "Chuyển cấp cao",
     "delegate": "Ủy quyền"
   },
-
   "analytics": {
     "title": "Phân tích dữ liệu",
     "overview": "Tổng quan",
@@ -286,7 +278,6 @@
     "growth": "Tăng trưởng",
     "decline": "Giảm"
   },
-
   "kpi": {
     "sellThrough": "Tỷ lệ bán hàng",
     "sellThroughDesc": "Phần trăm sản phẩm đã bán so với nhập",
@@ -312,7 +303,6 @@
     "warning": "Cảnh báo",
     "critical": "Nghiêm trọng"
   },
-
   "masterData": {
     "title": "Dữ liệu chủ",
     "brands": "Thương hiệu",
@@ -334,7 +324,6 @@
     "createdAt": "Ngày tạo",
     "updatedAt": "Cập nhật lần cuối"
   },
-
   "ai": {
     "assistant": "Trợ lý AI",
     "askQuestion": "Hỏi điều gì đó...",
@@ -355,7 +344,6 @@
       "suggestion": "Đề xuất sản phẩm nên mua tuần này"
     }
   },
-
   "notifications": {
     "title": "Thông báo",
     "markAllRead": "Đánh dấu tất cả đã đọc",
@@ -369,7 +357,6 @@
     "unread": "Chưa đọc",
     "read": "Đã đọc"
   },
-
   "settings": {
     "title": "Cài đặt",
     "profile": "Hồ sơ cá nhân",
@@ -398,7 +385,6 @@
     "version": "Phiên bản",
     "poweredBy": "Được hỗ trợ bởi"
   },
-
   "errors": {
     "generic": "Đã xảy ra lỗi. Vui lòng thử lại.",
     "networkError": "Lỗi kết nối mạng",
@@ -417,7 +403,6 @@
     "pageNotFound": "Trang không tồn tại",
     "goHome": "Về trang chủ"
   },
-
   "table": {
     "showing": "Hiển thị",
     "of": "trong số",
@@ -446,7 +431,6 @@
     "loading": "Đang tải...",
     "noResultsFound": "Không tìm thấy kết quả"
   },
-
   "time": {
     "justNow": "Vừa xong",
     "minutesAgo": "{count} phút trước",
@@ -456,7 +440,6 @@
     "monthsAgo": "{count} tháng trước",
     "yearsAgo": "{count} năm trước"
   },
-
   "format": {
     "date": "DD/MM/YYYY",
     "dateTime": "DD/MM/YYYY HH:mm",
@@ -464,7 +447,6 @@
     "currency": "vi-VN",
     "number": "vi-VN"
   },
-
   "reports": {
     "title": "Báo cáo",
     "generate": "Tạo báo cáo",
@@ -475,7 +457,6 @@
     "otbReport": "Báo cáo OTB",
     "customReport": "Báo cáo tùy chỉnh"
   },
-
   "alerts": {
     "title": "Cảnh báo dự đoán",
     "stockAlert": "Cảnh báo tồn kho",
@@ -490,7 +471,6 @@
     "warning": "Cảnh báo",
     "info": "Thông tin"
   },
-
   "pwa": {
     "installPrompt": "Cài đặt ứng dụng",
     "installDescription": "Cài đặt DAFC OTB để truy cập nhanh hơn",
@@ -504,7 +484,6 @@
     "updateLater": "Để sau",
     "backOnline": "Đã kết nối lại"
   },
-
   "mobile": {
     "menu": "Menu",
     "home": "Trang chủ",
@@ -514,7 +493,6 @@
     "swipeToEdit": "Vuốt để sửa",
     "tapToView": "Nhấn để xem chi tiết"
   },
-
   "roles": {
     "admin": "Quản trị viên",
     "planner": "Người lập kế hoạch",
@@ -522,7 +500,6 @@
     "buyer": "Người mua hàng",
     "viewer": "Người xem"
   },
-
   "ui": {
     "collapse": "Thu gọn",
     "expand": "Mở rộng",
@@ -558,7 +535,6 @@
     "logOut": "Đăng xuất",
     "backOnline": "Đã kết nối lại"
   },
-
   "forms": {
     "required": "Bắt buộc",
     "optional": "Tùy chọn",
@@ -603,7 +579,6 @@
     "user": "Người dùng",
     "brands": "Thương hiệu"
   },
-
   "filters": {
     "title": "Bộ lọc",
     "advanced": "Bộ lọc nâng cao",
@@ -647,7 +622,6 @@
     "allLocations": "Tất cả địa điểm",
     "allCategories": "Tất cả danh mục"
   },
-
   "search": {
     "title": "Tìm kiếm",
     "placeholder": "Tìm kiếm trang, thao tác và cài đặt...",
@@ -676,7 +650,6 @@
     "auditTrail": "Nhật ký hoạt động hệ thống",
     "helpDocs": "Trợ giúp và tài liệu"
   },
-
   "pages": {
     "masterData": {
       "title": "Dữ liệu chủ",
@@ -787,6 +760,7 @@
       "selectPlanError": "Vui lòng chọn kế hoạch OTB",
       "enterNameError": "Vui lòng nhập tên đề xuất",
       "proposalOverview": "Tổng quan đề xuất",
+      "importExcel": "Nhập từ Excel",
       "uploadExcel": "Tải Excel",
       "skuItems": "Danh sách SKU",
       "noSkuItems": "Chưa có SKU",
@@ -1548,7 +1522,6 @@
       }
     }
   },
-
   "excel": {
     "dropFile": "Thả file vào đây...",
     "dragDrop": "Kéo & thả file Excel của bạn vào đây",
@@ -1564,7 +1537,6 @@
     "itemsImported": "mục SKU đã được nhập thành công",
     "warnings": "Cảnh báo:"
   },
-
   "breadcrumb": {
     "dashboard": "Bảng điều khiển",
     "budget": "Ngân sách",

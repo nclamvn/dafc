@@ -51,7 +51,6 @@
     "less": "Less",
     "reset": "Reset"
   },
-
   "navigation": {
     "dashboard": "Dashboard",
     "budget": "Budget",
@@ -77,7 +76,6 @@
     "toggleTheme": "Toggle theme",
     "aiFeatures": "AI Features"
   },
-
   "auth": {
     "login": "Login",
     "logout": "Logout",
@@ -98,7 +96,6 @@
     "signInDescription": "Enter your credentials",
     "welcomeBack": "Welcome back"
   },
-
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome back, {name}!",
@@ -157,7 +154,6 @@
     "allCaughtUp": "You're all caught up!",
     "priority": "priority"
   },
-
   "budget": {
     "title": "Budget Management",
     "createBudget": "Create Budget",
@@ -186,7 +182,6 @@
     "totalUsed": "Total Used",
     "allocation": "Allocation"
   },
-
   "otb": {
     "title": "Open-to-Buy Plan",
     "createPlan": "Create OTB Plan",
@@ -211,7 +206,6 @@
     "analysis": "OTB Analysis",
     "newPlan": "New Plan"
   },
-
   "sku": {
     "title": "SKU Proposal",
     "createProposal": "Create Proposal",
@@ -238,7 +232,6 @@
     "proposal": "Proposal",
     "newProposal": "New Proposal"
   },
-
   "approval": {
     "title": "Approval Management",
     "pendingApprovals": "Pending Approvals",
@@ -258,7 +251,6 @@
     "escalate": "Escalate",
     "delegate": "Delegate"
   },
-
   "analytics": {
     "title": "Analytics",
     "overview": "Overview",
@@ -286,7 +278,6 @@
     "growth": "Growth",
     "decline": "Decline"
   },
-
   "kpi": {
     "sellThrough": "Sell-Through Rate",
     "sellThroughDesc": "Percentage of products sold vs. received",
@@ -312,7 +303,6 @@
     "warning": "Warning",
     "critical": "Critical"
   },
-
   "masterData": {
     "title": "Master Data",
     "brands": "Brands",
@@ -334,7 +324,6 @@
     "createdAt": "Created At",
     "updatedAt": "Last Updated"
   },
-
   "ai": {
     "assistant": "AI Assistant",
     "askQuestion": "Ask something...",
@@ -355,7 +344,6 @@
       "suggestion": "What products should we buy this week?"
     }
   },
-
   "notifications": {
     "title": "Notifications",
     "markAllRead": "Mark all as read",
@@ -369,7 +357,6 @@
     "unread": "Unread",
     "read": "Read"
   },
-
   "settings": {
     "title": "Settings",
     "profile": "Profile",
@@ -398,7 +385,6 @@
     "version": "Version",
     "poweredBy": "Powered by"
   },
-
   "errors": {
     "generic": "An error occurred. Please try again.",
     "networkError": "Network error",
@@ -417,7 +403,6 @@
     "pageNotFound": "Page not found",
     "goHome": "Go Home"
   },
-
   "table": {
     "showing": "Showing",
     "of": "of",
@@ -446,7 +431,6 @@
     "loading": "Loading...",
     "noResultsFound": "No results found"
   },
-
   "time": {
     "justNow": "Just now",
     "minutesAgo": "{count} minutes ago",
@@ -456,7 +440,6 @@
     "monthsAgo": "{count} months ago",
     "yearsAgo": "{count} years ago"
   },
-
   "format": {
     "date": "MM/DD/YYYY",
     "dateTime": "MM/DD/YYYY h:mm A",
@@ -464,7 +447,6 @@
     "currency": "en-US",
     "number": "en-US"
   },
-
   "reports": {
     "title": "Reports",
     "generate": "Generate Report",
@@ -475,7 +457,6 @@
     "otbReport": "OTB Report",
     "customReport": "Custom Report"
   },
-
   "alerts": {
     "title": "Predictive Alerts",
     "stockAlert": "Stock Alert",
@@ -490,7 +471,6 @@
     "warning": "Warning",
     "info": "Info"
   },
-
   "pwa": {
     "installPrompt": "Install App",
     "installDescription": "Install DAFC OTB for faster access",
@@ -504,7 +484,6 @@
     "updateLater": "Later",
     "backOnline": "Back online"
   },
-
   "mobile": {
     "menu": "Menu",
     "home": "Home",
@@ -514,7 +493,6 @@
     "swipeToEdit": "Swipe to edit",
     "tapToView": "Tap to view details"
   },
-
   "roles": {
     "admin": "Administrator",
     "planner": "Planner",
@@ -522,7 +500,6 @@
     "buyer": "Buyer",
     "viewer": "Viewer"
   },
-
   "ui": {
     "collapse": "Collapse",
     "expand": "Expand",
@@ -558,7 +535,6 @@
     "logOut": "Log out",
     "backOnline": "Back online"
   },
-
   "forms": {
     "required": "Required",
     "optional": "Optional",
@@ -603,7 +579,6 @@
     "user": "User",
     "brands": "Brands"
   },
-
   "filters": {
     "title": "Filters",
     "advanced": "Advanced Filters",
@@ -647,7 +622,6 @@
     "allLocations": "All Locations",
     "allCategories": "All Categories"
   },
-
   "search": {
     "title": "Search",
     "placeholder": "Search pages, actions, and settings...",
@@ -676,7 +650,6 @@
     "auditTrail": "View system activity logs",
     "helpDocs": "Help and documentation"
   },
-
   "pages": {
     "masterData": {
       "title": "Master Data",
@@ -787,6 +760,7 @@
       "selectPlanError": "Please select an OTB plan",
       "enterNameError": "Please enter a proposal name",
       "proposalOverview": "Proposal Overview",
+      "importExcel": "Import from Excel",
       "uploadExcel": "Upload Excel",
       "skuItems": "SKU Items",
       "noSkuItems": "No SKU items yet",
@@ -1548,7 +1522,6 @@
       }
     }
   },
-
   "excel": {
     "dropFile": "Drop the file here...",
     "dragDrop": "Drag & drop your Excel file here",
@@ -1564,7 +1537,6 @@
     "itemsImported": "SKU items imported successfully",
     "warnings": "Warnings:"
   },
-
   "breadcrumb": {
     "dashboard": "Dashboard",
     "budget": "Budget",
