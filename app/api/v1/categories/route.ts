@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { categorySchema } from '@/lib/validations/category';
+import {
+  parseJsonBody,
+  handlePrismaError,
+  errorResponse,
+} from '@/lib/utils/api-helpers';
 
 export async function GET(request: NextRequest) {
   try {
@@ -35,29 +40,41 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching categories:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch categories' },
-      { status: 500 }
-    );
+    const prismaResponse = handlePrismaError(error, 'fetching categories');
+    if (prismaResponse) return prismaResponse;
+
+    return errorResponse('Failed to fetch categories', 500, error instanceof Error ? error.message : undefined);
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const validatedData = categorySchema.parse(body);
+    // 1. Parse JSON body safely
+    const [body, parseError] = await parseJsonBody(request);
+    if (parseError) return parseError;
 
+    // 2. Validate with Zod schema
+    const validationResult = categorySchema.safeParse(body);
+    if (!validationResult.success) {
+      return errorResponse(
+        validationResult.error.errors[0]?.message || 'Validation failed',
+        400,
+        validationResult.error.errors
+      );
+    }
+
+    const validatedData = validationResult.data;
+
+    // 3. Check for duplicate code
     const existingCategory = await prisma.category.findUnique({
       where: { code: validatedData.code },
     });
 
     if (existingCategory) {
-      return NextResponse.json(
-        { success: false, error: 'Category code already exists' },
-        { status: 400 }
-      );
+      return errorResponse('Category code already exists', 400);
     }
 
+    // 4. Create category
     const category = await prisma.category.create({
       data: {
         name: validatedData.name,
@@ -71,17 +88,13 @@ export async function POST(request: NextRequest) {
       success: true,
       data: category,
     });
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('Error creating category:', error);
-    if (error && typeof error === 'object' && 'errors' in error) {
-      return NextResponse.json(
-        { success: false, error: 'Validation failed' },
-        { status: 400 }
-      );
-    }
-    return NextResponse.json(
-      { success: false, error: 'Failed to create category' },
-      { status: 500 }
-    );
+
+    // Handle Prisma errors
+    const prismaResponse = handlePrismaError(error, 'creating category');
+    if (prismaResponse) return prismaResponse;
+
+    return errorResponse('Failed to create category', 500, error instanceof Error ? error.message : undefined);
   }
 }
