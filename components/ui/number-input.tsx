@@ -59,7 +59,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     }, [value]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      let inputValue = e.target.value;
+      const inputValue = e.target.value;
 
       // Allow empty value
       if (inputValue === '') {

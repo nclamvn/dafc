@@ -9,8 +9,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { NumberInput, CurrencyInput, PercentInput, IntegerInput } from '@/components/ui/number-input';
+import { CurrencyInput, PercentInput, IntegerInput } from '@/components/ui/number-input';
 import {
   Select,
   SelectContent,
