@@ -12,6 +12,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { CurrencyInput } from '@/components/ui/number-input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -197,32 +198,12 @@ export function BudgetForm({
                   <FormItem>
                     <FormLabel>Total Budget *</FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                          $
-                        </span>
-                        <Input
-                          type="text"
-                          inputMode="decimal"
-                          placeholder="0.00"
-                          className="pl-7"
-                          disabled={isLoading}
-                          value={field.value || ''}
-                          onChange={(e) => {
-                            // Remove leading zeros and non-numeric chars except decimal
-                            const cleaned = e.target.value.replace(/[^\d.]/g, '');
-                            const normalized = cleaned.replace(/^0+(\d)/, '$1');
-                            const parsed = parseFloat(normalized) || 0;
-                            field.onChange(parsed);
-                          }}
-                          onBlur={() => {
-                            // Format on blur
-                            if (field.value) {
-                              field.onChange(parseFloat(String(field.value)) || 0);
-                            }
-                          }}
-                        />
-                      </div>
+                      <CurrencyInput
+                        value={field.value}
+                        onChange={(val) => field.onChange(val || 0)}
+                        placeholder="0.00"
+                        disabled={isLoading}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -267,27 +248,12 @@ export function BudgetForm({
                   <FormItem>
                     <FormLabel>Seasonal Budget</FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                          $
-                        </span>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          placeholder="0.00"
-                          className="pl-7"
-                          disabled={isLoading}
-                          {...field}
-                          value={field.value || ''}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value
-                                ? parseFloat(e.target.value)
-                                : undefined
-                            )
-                          }
-                        />
-                      </div>
+                      <CurrencyInput
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="0.00"
+                        disabled={isLoading}
+                      />
                     </FormControl>
                     <FormDescription>
                       Budget for seasonal collection
@@ -304,27 +270,12 @@ export function BudgetForm({
                   <FormItem>
                     <FormLabel>Replenishment Budget</FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                          $
-                        </span>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          placeholder="0.00"
-                          className="pl-7"
-                          disabled={isLoading}
-                          {...field}
-                          value={field.value || ''}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value
-                                ? parseFloat(e.target.value)
-                                : undefined
-                            )
-                          }
-                        />
-                      </div>
+                      <CurrencyInput
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="0.00"
+                        disabled={isLoading}
+                      />
                     </FormControl>
                     <FormDescription>
                       Budget for stock replenishment

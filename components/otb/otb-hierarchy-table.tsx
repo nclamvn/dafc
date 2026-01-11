@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NumberInput, CurrencyInput, PercentInput, IntegerInput } from '@/components/ui/number-input';
 import {
   Select,
   SelectContent,
@@ -379,15 +380,10 @@ export function OTBHierarchyTable({
                           </TableCell>
                           <TableCell className="text-right">
                             {isEditable ? (
-                              <Input
-                                type="number"
+                              <IntegerInput
                                 value={item.plannedUnits}
-                                onChange={(e) =>
-                                  handleUpdateItem(
-                                    globalIndex,
-                                    'plannedUnits',
-                                    parseInt(e.target.value) || 0
-                                  )
+                                onChange={(val) =>
+                                  handleUpdateItem(globalIndex, 'plannedUnits', val || 0)
                                 }
                                 className="w-24 text-right"
                               />
@@ -397,15 +393,10 @@ export function OTBHierarchyTable({
                           </TableCell>
                           <TableCell className="text-right">
                             {isEditable ? (
-                              <Input
-                                type="number"
+                              <CurrencyInput
                                 value={item.plannedAmount}
-                                onChange={(e) =>
-                                  handleUpdateItem(
-                                    globalIndex,
-                                    'plannedAmount',
-                                    parseFloat(e.target.value) || 0
-                                  )
+                                onChange={(val) =>
+                                  handleUpdateItem(globalIndex, 'plannedAmount', val || 0)
                                 }
                                 className="w-28 text-right"
                               />
@@ -415,16 +406,10 @@ export function OTBHierarchyTable({
                           </TableCell>
                           <TableCell className="text-right">
                             {isEditable ? (
-                              <Input
-                                type="number"
-                                step="0.01"
+                              <CurrencyInput
                                 value={item.averageRetailPrice}
-                                onChange={(e) =>
-                                  handleUpdateItem(
-                                    globalIndex,
-                                    'averageRetailPrice',
-                                    parseFloat(e.target.value) || 0
-                                  )
+                                onChange={(val) =>
+                                  handleUpdateItem(globalIndex, 'averageRetailPrice', val || 0)
                                 }
                                 className="w-24 text-right"
                               />
@@ -434,16 +419,10 @@ export function OTBHierarchyTable({
                           </TableCell>
                           <TableCell className="text-right">
                             {isEditable ? (
-                              <Input
-                                type="number"
-                                step="0.01"
+                              <CurrencyInput
                                 value={item.averageCostPrice}
-                                onChange={(e) =>
-                                  handleUpdateItem(
-                                    globalIndex,
-                                    'averageCostPrice',
-                                    parseFloat(e.target.value) || 0
-                                  )
+                                onChange={(val) =>
+                                  handleUpdateItem(globalIndex, 'averageCostPrice', val || 0)
                                 }
                                 className="w-24 text-right"
                               />
@@ -453,15 +432,10 @@ export function OTBHierarchyTable({
                           </TableCell>
                           <TableCell className="text-right">
                             {isEditable ? (
-                              <Input
-                                type="number"
+                              <PercentInput
                                 value={item.marginPercent}
-                                onChange={(e) =>
-                                  handleUpdateItem(
-                                    globalIndex,
-                                    'marginPercent',
-                                    parseFloat(e.target.value) || 0
-                                  )
+                                onChange={(val) =>
+                                  handleUpdateItem(globalIndex, 'marginPercent', val || 0)
                                 }
                                 className="w-20 text-right"
                               />
@@ -471,15 +445,10 @@ export function OTBHierarchyTable({
                           </TableCell>
                           <TableCell className="text-right">
                             {isEditable ? (
-                              <Input
-                                type="number"
+                              <PercentInput
                                 value={item.sellThruTarget}
-                                onChange={(e) =>
-                                  handleUpdateItem(
-                                    globalIndex,
-                                    'sellThruTarget',
-                                    parseFloat(e.target.value) || 0
-                                  )
+                                onChange={(val) =>
+                                  handleUpdateItem(globalIndex, 'sellThruTarget', val || 0)
                                 }
                                 className="w-20 text-right"
                               />
@@ -489,15 +458,10 @@ export function OTBHierarchyTable({
                           </TableCell>
                           <TableCell className="text-right">
                             {isEditable ? (
-                              <Input
-                                type="number"
-                                value={item.weeksOfSupply || ''}
-                                onChange={(e) =>
-                                  handleUpdateItem(
-                                    globalIndex,
-                                    'weeksOfSupply',
-                                    parseInt(e.target.value) || undefined
-                                  )
+                              <IntegerInput
+                                value={item.weeksOfSupply}
+                                onChange={(val) =>
+                                  handleUpdateItem(globalIndex, 'weeksOfSupply', val)
                                 }
                                 className="w-16 text-right"
                               />

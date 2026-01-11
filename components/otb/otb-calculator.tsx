@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { CurrencyInput } from '@/components/ui/number-input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -368,11 +369,9 @@ export function OTBCalculator({
                   <TrendingUp className="h-4 w-4 text-green-600" />
                   Planned Sales
                 </Label>
-                <Input
-                  id="plannedSales"
-                  type="number"
+                <CurrencyInput
                   value={inputs.plannedSales}
-                  onChange={(e) => handleInputChange('plannedSales', parseFloat(e.target.value) || 0)}
+                  onChange={(val) => handleInputChange('plannedSales', val || 0)}
                   disabled={readOnly}
                   className="text-right"
                 />
@@ -384,11 +383,9 @@ export function OTBCalculator({
                   <Percent className="h-4 w-4 text-yellow-600" />
                   Planned Markdowns
                 </Label>
-                <Input
-                  id="plannedMarkdowns"
-                  type="number"
+                <CurrencyInput
                   value={inputs.plannedMarkdowns}
-                  onChange={(e) => handleInputChange('plannedMarkdowns', parseFloat(e.target.value) || 0)}
+                  onChange={(val) => handleInputChange('plannedMarkdowns', val || 0)}
                   disabled={readOnly}
                   className="text-right"
                 />
@@ -400,11 +397,9 @@ export function OTBCalculator({
                   <Package className="h-4 w-4 text-blue-600" />
                   Planned EOM Inventory
                 </Label>
-                <Input
-                  id="plannedEOMInventory"
-                  type="number"
+                <CurrencyInput
                   value={inputs.plannedEOMInventory}
-                  onChange={(e) => handleInputChange('plannedEOMInventory', parseFloat(e.target.value) || 0)}
+                  onChange={(val) => handleInputChange('plannedEOMInventory', val || 0)}
                   disabled={readOnly}
                   className="text-right"
                 />
@@ -416,11 +411,9 @@ export function OTBCalculator({
                   <Package className="h-4 w-4 text-purple-600" />
                   BOM Inventory
                 </Label>
-                <Input
-                  id="bomInventory"
-                  type="number"
+                <CurrencyInput
                   value={inputs.bomInventory}
-                  onChange={(e) => handleInputChange('bomInventory', parseFloat(e.target.value) || 0)}
+                  onChange={(val) => handleInputChange('bomInventory', val || 0)}
                   disabled={readOnly}
                   className="text-right"
                 />
@@ -432,11 +425,9 @@ export function OTBCalculator({
                   <ShoppingCart className="h-4 w-4 text-orange-600" />
                   On Order
                 </Label>
-                <Input
-                  id="onOrder"
-                  type="number"
+                <CurrencyInput
                   value={inputs.onOrder}
-                  onChange={(e) => handleInputChange('onOrder', parseFloat(e.target.value) || 0)}
+                  onChange={(val) => handleInputChange('onOrder', val || 0)}
                   disabled={readOnly}
                   className="text-right"
                 />
